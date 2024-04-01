@@ -8,14 +8,13 @@ let messages = [];
 
 let getData = () =>
 {
-    getAllVoices();
     getSavedChannel();
     getSavedVoice();
     getSavedVolume();
     getSavedExcluded();
 }
 
-let getAllVoices = () =>
+synth.onvoiceschanged = () =>
 {
     voices = synth.getVoices();
     let voicesList = document.getElementById("voiceList");
