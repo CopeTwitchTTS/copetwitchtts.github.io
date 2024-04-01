@@ -39,7 +39,8 @@ let getSavedChannel = () =>
     .then(data => 
     {
         document.getElementById("channel").value = data.channel;
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 }
 
 let getSavedVoice = () =>
@@ -54,7 +55,8 @@ let getSavedVoice = () =>
     {
         voice = data.voice;
         document.getElementById("voiceList").selectedIndex = voice;
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 }
 
 let getSavedVolume = () =>
@@ -69,7 +71,8 @@ let getSavedVolume = () =>
     {
         volume = data.volume;
         document.getElementById("volume").value = volume;
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 }
 
 let getSavedExcluded = () =>
@@ -102,7 +105,8 @@ let getSavedExcluded = () =>
             });
             excludedList.appendChild(button);
         })
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 }
 
 let voiceList = document.getElementById("voiceList");
@@ -126,7 +130,8 @@ document.getElementById("play").addEventListener("click", () =>
     {
         method: "PUT",
         redirect: "manual"
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 });
 
 document.getElementById("skip").addEventListener("click", () =>
@@ -156,7 +161,8 @@ document.getElementById("exclude").addEventListener("click", () =>
     {
         method: "POST",
         redirect: "manual"
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
     excluded.push(name);
 
     let excludedList = document.getElementById("excludedList");
@@ -169,7 +175,8 @@ document.getElementById("exclude").addEventListener("click", () =>
         {
             method: "DELETE",
             redirect: "manual"
-        });
+        })
+        .catch(() => console.log("Unable to connect to the api"));
 
         excluded.splice(excluded.indexOf(name), 1);
         button.remove();
@@ -209,5 +216,6 @@ setInterval(() =>
             utterance.volume = volume;
             synth.speak(utterance);
         })
-    });
+    })
+    .catch(() => console.log("Unable to connect to the api"));
 }, 100)
