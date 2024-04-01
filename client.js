@@ -126,7 +126,7 @@ document.getElementById("play").addEventListener("click", () =>
     running = true;
     synth.cancel();
     let channel = document.getElementById("channel").value;
-    fetch(`http://localhost:1212/settings?channel=${channel}&voice=${voice}&volume=${volume}`, 
+    fetch(`http://localhost:1212/connect?channel=${channel}&voice=${voice}&volume=${volume}`, 
     {
         method: "PUT",
         redirect: "manual"
