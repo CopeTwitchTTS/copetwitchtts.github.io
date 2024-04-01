@@ -1,0 +1,138 @@
+body
+{
+    background: #101010;
+}
+
+.menu
+{
+    position: absolute;
+    left: 0;
+    width: 12.5vw;
+    height: 100vh;
+    background: #262626;
+}
+
+
+.title
+{
+    position: relative;
+    width: 12.5vw;
+    height: 6vh;
+    background: #212121;
+}
+
+.title h2
+{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+
+.buttons
+{
+    position: relative;
+    width: 12.5vw;
+    padding: 1vw;
+}
+
+.buttons button
+{
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+
+.settings
+{
+    position: relative;
+    width: 12.5vw;
+    padding: 1vw;
+}
+
+button
+{
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+#voiceList
+{
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+.volumeSettings
+{
+    color: white;
+}
+
+.volumeSettings label, .volumeSettings input
+{
+    width: 100%;
+}
+
+
+.excludeSettings
+{
+    position: relative;
+    width: 12.5vw;
+    padding: 1vw;
+    color: white;
+}
+
+.excludeSettings input, .excludeSettings button
+{
+    margin-bottom: 1vh;
+}
+
+
+#excludedList
+{
+    position: relative;
+    width: 12.5vw;
+    height: 50vh;
+    overflow-y: scroll;
+    padding: 1vw;
+}
+
+#excludedList button
+{
+    width: 100%;
+}
+
+
+#messageList
+{
+    position: absolute;
+    left: 12.5vw;
+    height: 100vh;
+    width: 87.5vw;
+    padding: 1vw;
+    overflow-y: scroll;
+    color: white;
+}
+
+
+::-webkit-scrollbar
+{
+    width: 0.5vw;
+}
+
+::-webkit-scrollbar-track
+{
+    background: #10101000; 
+}
+
+::-webkit-scrollbar-thumb
+{
+    background: #383838;
+    border-radius: 1vw;
+}
+
+::-webkit-scrollbar-thumb:hover
+{
+    background: #595959; 
+}
