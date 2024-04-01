@@ -1,18 +1,14 @@
 const synth = window.speechSynthesis;
 let running = false;
+
 let voices;
-let voice = 0;
+let channel = "kinessa__";
+let voice = 3;
 let volume = 100;
-let excluded = [];
+let excluded = [ "Moobot" ];
 let messages = [];
 
-let getData = () =>
-{
-    getSavedChannel();
-    getSavedVoice();
-    getSavedVolume();
-    getSavedExcluded();
-}
+let client = undefined;
 
 synth.onvoiceschanged = () =>
 {
@@ -24,95 +20,22 @@ synth.onvoiceschanged = () =>
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
+        if(item.name == "Google US English")
+            option.selected = true;
         voicesList.add(option);
     });
-}
-
-let getSavedChannel = () =>
-{
-    fetch(`http://localhost:1212/channel`, 
-    {
-        method: "GET",
-        redirect: "manual"
-    })
-    .then(response => response.json())
-    .then(data => 
-    {
-        document.getElementById("channel").value = data.channel;
-    })
-    .catch(() => console.log("Unable to connect to the api"));
-}
-
-let getSavedVoice = () =>
-{
-    fetch(`http://localhost:1212/voice`, 
-    {
-        method: "GET",
-        redirect: "manual"
-    })
-    .then(response => response.json())
-    .then(data => 
-    {
-        voice = data.voice;
-        document.getElementById("voiceList").selectedIndex = voice;
-    })
-    .catch(() => console.log("Unable to connect to the api"));
-}
-
-let getSavedVolume = () =>
-{
-    fetch(`http://localhost:1212/volume`, 
-    {
-        method: "GET",
-        redirect: "manual"
-    })
-    .then(response => response.json())
-    .then(data => 
-    {
-        volume = data.volume;
-        document.getElementById("volume").value = volume;
-    })
-    .catch(() => console.log("Unable to connect to the api"));
-}
-
-let getSavedExcluded = () =>
-{
-    fetch(`http://localhost:1212/excluded`, 
-    {
-        method: "GET",
-        redirect: "manual"
-    })
-    .then(response => response.json())
-    .then(data => 
-    {
-        excluded = data.excluded;
-        let excludedList = document.getElementById("excludedList");
-        excluded.forEach((item, index) =>
-        {
-            let button = document.createElement("button");
-            button.innerText = item;
-            button.setAttribute("class", "btn btn-light");
-            button.addEventListener("click", () =>
-            {
-                fetch(`http://localhost:1212/excluded/${item}`, 
-                {
-                    method: "DELETE",
-                    redirect: "manual"
-                });
-
-                excluded.splice(excluded.indexOf(item), 1);
-                button.remove();
-            });
-            excludedList.appendChild(button);
-        })
-    })
-    .catch(() => console.log("Unable to connect to the api"));
 }
 
 let voiceList = document.getElementById("voiceList");
 voiceList.addEventListener("change", () =>
 {
     voice = voiceList.value;
+});
+
+let channelElement = document.getElementById("channel");
+channelElement.addEventListener("change", () =>
+{
+    channel = channelElement.value;
 });
 
 let volumeElement = document.getElementById("volume");
@@ -125,14 +48,72 @@ document.getElementById("play").addEventListener("click", () =>
 {
     running = true;
     synth.cancel();
-    let channel = document.getElementById("channel").value;
-    fetch(`http://localhost:1212/connect?channel=${channel}&voice=${voice}&volume=${volume}`, 
+    
+    if(client !== undefined)
+    client.disconnect();
+
+    client = new tmi.Client(
     {
-        method: "PUT",
-        redirect: "manual"
-    })
-    .catch(() => console.log("Unable to connect to the api"));
+        connection:
+        {
+            secure: true,
+            reconnect: true,
+        },
+        channels: [ channel ]
+    });
+    client.connect();
+
+    client.on("message", (channel, tags, message, self) =>
+    {
+        const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+        if(message.match(new RegExp(regex)))
+            return;
+
+        if(excluded.includes(tags["display-name"]))
+            return;
+
+        //handleMessage(tags["display-name"], tags["color"], message);
+
+        while(true)
+        {
+            if(message.length < 200)
+            {
+                handleMessage(tags["display-name"], tags["color"], message);
+                break;
+            }
+            
+            let trimmedMessage = message.substring(0, Math.min(message.length, 200));
+            let lastSpaceIndex = trimmedMessage.lastIndexOf(" ");
+            if(lastSpaceIndex > 150)
+                trimmedMessage = trimmedMessage.substring(0, lastSpaceIndex);
+            
+            message = message.substring(trimmedMessage.length + 1, message.length);
+            handleMessage(tags["display-name"], tags["color"], trimmedMessage);
+            if(message.length == 0)
+                break;
+        }
+    });
 });
+
+let handleMessage = (name, color, message) =>
+{
+    let messageList = document.getElementById("messageList");
+    let div = document.createElement("div");
+    let nickSpan = document.createElement("span");
+    nickSpan.innerText = `${name}`;
+    nickSpan.style.color = color;
+    div.appendChild(nickSpan);
+
+    let messageSpan = document.createElement("span");
+    messageSpan.innerText = `: ${message}`;
+    div.appendChild(messageSpan);
+    messageList.appendChild(div);
+
+    let utterance = new SpeechSynthesisUtterance(message);
+    utterance.voice = voices[voice];
+    utterance.volume = volume;
+    synth.speak(utterance);
+}
 
 document.getElementById("skip").addEventListener("click", () =>
 {
@@ -157,12 +138,6 @@ document.getElementById("exclude").addEventListener("click", () =>
     if(name === null || name.trim() === "")
         return;
 
-    fetch(`http://localhost:1212/excluded/${name}`, 
-    {
-        method: "POST",
-        redirect: "manual"
-    })
-    .catch(() => console.log("Unable to connect to the api"));
     excluded.push(name);
 
     let excludedList = document.getElementById("excludedList");
@@ -171,51 +146,14 @@ document.getElementById("exclude").addEventListener("click", () =>
     button.setAttribute("class", "btn btn-light");
     button.addEventListener("click", () =>
     {
-        fetch(`http://localhost:1212/excluded/${name}`, 
-        {
-            method: "DELETE",
-            redirect: "manual"
-        })
-        .catch(() => console.log("Unable to connect to the api"));
-
         excluded.splice(excluded.indexOf(name), 1);
         button.remove();
     });
     excludedList.appendChild(button);
 });
 
-setInterval(() =>
+let removeDefaultExcluded = (element) =>
 {
-    if(!running)
-        return;
-
-    fetch(`http://localhost:1212/message`, 
-    {
-        method: "GET",
-        redirect: "manual"
-    })
-    .then(response => response.json())
-    .then(data => 
-    {
-        let messageList = document.getElementById("messageList");
-        data.messages.forEach((item, index) =>
-        {
-            let div = document.createElement("div");
-            let nickSpan = document.createElement("span");
-            nickSpan.innerText = `${item.nick}: `;
-            nickSpan.style.color = item.color;
-            div.appendChild(nickSpan);
-
-            let messageSpan = document.createElement("span");
-            messageSpan.innerText = item.message;
-            div.appendChild(messageSpan);
-            messageList.appendChild(div);
-
-            let utterance = new SpeechSynthesisUtterance(item.message);
-            utterance.voice = voices[voice];
-            utterance.volume = volume;
-            synth.speak(utterance);
-        })
-    })
-    .catch(() => console.log("Unable to connect to the api"));
-}, 100)
+    excluded.splice(excluded.indexOf(element.value), 1);
+    element.remove();
+}

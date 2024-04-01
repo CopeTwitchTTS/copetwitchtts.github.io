@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="client.css">
     <link rel="icon" type="image/png" href="https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png">
 </head>
-<body onload="getData()">
+<body>
     
     <div class="menu">
         <div class="title">
@@ -26,7 +26,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon3">twitch.tv/</span>
                 </div>
-                <input type="text" class="form-control" id="channel">
+                <input type="text" class="form-control" id="channel" value="kinessa__">
             </div>
 
             <select id="voiceList" class="form-select">
@@ -34,7 +34,7 @@
 
             <div class="volumeSettings">
                 <label for="volume">Volume</label>
-                <input type="range" min="1" max="100" step="1" id="volume">
+                <input type="range" min="1" max="100" step="1" value="100" id="volume">
             </div>
         </div>
 
@@ -42,13 +42,16 @@
             <input type="text" placeholder="Exclude User" class="form-control" id="excludeName">
             <button class="btn btn-primary" id="exclude">Exclude</button>
         </div>
-        <div id="excludedList"></div>
+        <div id="excludedList">
+            <button class="btn btn-light" onclick="removeDefaultExcluded(this)" value="Moobot">Moobot</button>
+        </div>
     </div>
 
     <div id="messageList">
 
     </div>
 
+    <script src="tmi.js"></script>
     <script src="client.js"></script>
 </body>
 </html>
