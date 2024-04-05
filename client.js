@@ -68,8 +68,12 @@ document.getElementById("play").addEventListener("click", () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
-        const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-        if(message.match(new RegExp(regex)))
+        const commandsRegex = /^\!/;
+        if(message.match(new RegExp(commandsRegex)))
+            return;
+
+        const linkRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+        if(message.match(new RegExp(linkRegex)))
         {
             handleMessage(tags["display-name"], tags["color"], `${tags["display-name"]} sent a link`);
             return;
