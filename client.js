@@ -1,13 +1,11 @@
 const synth = window.speechSynthesis;
-let running = false;
 
 let voices;
 let channel = "kinessa__";
-let voice = 3;
+let voice = 0;
 let volume = 100;
 let excluded = [ "Moobot" ];
 let messages = [];
-
 let client = undefined;
 
 synth.onvoiceschanged = () =>
@@ -21,7 +19,10 @@ synth.onvoiceschanged = () =>
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
         if(item.name == "Google US English")
+        {
             option.selected = true;
+            voice = index;
+        }
         voicesList.add(option);
     });
 }
@@ -46,11 +47,10 @@ volumeElement.addEventListener("change", () =>
 
 document.getElementById("play").addEventListener("click", () =>
 {
-    running = true;
     synth.cancel();
     
     if(client !== undefined)
-    client.disconnect();
+        client.disconnect();
 
     client = new tmi.Client(
     {
@@ -123,7 +123,8 @@ document.getElementById("skip").addEventListener("click", () =>
 
 document.getElementById("stop").addEventListener("click", () =>
 {
-    running = false;
+    if(client !== undefined)
+        client.disconnect();
     synth.cancel();
 });
 
