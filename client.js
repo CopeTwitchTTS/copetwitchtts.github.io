@@ -8,10 +8,17 @@ let excluded = [ "Moobot" ];
 let messages = [];
 let client = undefined;
 
+let clearSelect = (element) =>
+{
+    for(let i = element.options.length - 1; i >= 0; i--)
+        element.remove(i);
+}
+
 synth.onvoiceschanged = () =>
 {
     voices = synth.getVoices();
     let voicesList = document.getElementById("voiceList");
+    clearSelect(voicesList);
 
     voices.forEach((item, index) =>
     {
@@ -57,7 +64,7 @@ document.getElementById("play").addEventListener("click", () =>
         connection:
         {
             secure: true,
-            reconnect: true,
+            reconnect: true
         },
         channels: [ channel ]
     });
@@ -78,29 +85,44 @@ document.getElementById("play").addEventListener("click", () =>
             handleMessage(tags["display-name"], tags["color"], `${tags["display-name"]} sent a link`);
             return;
         }
-        
+
         while(true)
         {
-            if(message.length < 200)
+            if((message.length <= 200 && message.lastIndexOf(" ") !== -1) || (message.length <= 100 && message.lastIndexOf(" ") === -1))
             {
-                handleMessage(tags["display-name"], tags["color"], message);
+                addToChatHistory(tags["display-name"], tags["color"], message);
+                addToQueue(message);
                 break;
             }
             
-            let trimmedMessage = message.substring(0, Math.min(message.length, 200));
+            let trimmedMessage = message.substring(0, Math.min(message.length, 199));
             let lastSpaceIndex = trimmedMessage.lastIndexOf(" ");
-            if(lastSpaceIndex > 150)
+            if(lastSpaceIndex > 100)
+            {
                 trimmedMessage = trimmedMessage.substring(0, lastSpaceIndex);
+                message = message.substring(trimmedMessage.length + 1, message.length);
+            }
+            else if(lastSpaceIndex === -1)
+            {
+                trimmedMessage = trimmedMessage.substring(0, 99);
+                message = message.substring(trimmedMessage.length, message.length);
+            }
             
-            message = message.substring(trimmedMessage.length + 1, message.length);
-            handleMessage(tags["display-name"], tags["color"], trimmedMessage);
-            if(message.length == 0)
-                break;
+            addToChatHistory(tags["display-name"], tags["color"], trimmedMessage);
+            addToQueue(trimmedMessage);
         }
     });
 });
 
-let handleMessage = (name, color, message) =>
+let addToQueue = (message) =>
+{
+    let utterance = new SpeechSynthesisUtterance(message);
+    utterance.voice = voices[voice];
+    utterance.volume = volume;
+    synth.speak(utterance);
+}
+
+let addToChatHistory = (name, color, message) =>
 {
     let messageList = document.getElementById("messageList");
     let div = document.createElement("div");
@@ -113,11 +135,6 @@ let handleMessage = (name, color, message) =>
     messageSpan.innerText = `: ${message}`;
     div.appendChild(messageSpan);
     messageList.appendChild(div);
-
-    let utterance = new SpeechSynthesisUtterance(message);
-    utterance.voice = voices[voice];
-    utterance.volume = volume;
-    synth.speak(utterance);
 }
 
 document.getElementById("skip").addEventListener("click", () =>
