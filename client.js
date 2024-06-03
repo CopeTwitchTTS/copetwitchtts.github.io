@@ -39,7 +39,6 @@ synth.onvoiceschanged = () =>
                     lang: item.lang.substring(0, 2),
                     index: index});
     });
-    console.log(languages);
 }
 
 let voiceList = document.getElementById("voiceList");
@@ -94,12 +93,11 @@ document.getElementById("play").addEventListener("click", () =>
             }
                 
         });
-        //console.log(message);
 
         const resetRegex = /^\!resetTTS/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
-            addCustomMessageToChatHistory(`${tags["display-name"]} reseted the TTS`);
+            addCustomMessageToChatHistory(`${tags["display-name"]} reset the TTS`);
             synth.cancel();
         }
 
