@@ -2,6 +2,7 @@ const synth = window.speechSynthesis;
 
 let voices;
 let languages = [];
+let defaultLanguage = 0;
 let channel = "kinessa__";
 let voice = 0;
 let volume = 100;
@@ -30,11 +31,15 @@ synth.onvoiceschanged = () =>
         {
             option.selected = true;
             voice = index;
+            defaultLanguage = index;
         }
         voicesList.add(option);
-        if(item.name.includes("Google"))
-            languages.push(item.lang.substring(0, 1));
+        if(item.name.includes("Google") && !item.lang.includes("en"))
+            languages.push({
+                    lang: item.lang.substring(0, 2),
+                    index: index});
     });
+    console.log(languages);
 }
 
 let voiceList = document.getElementById("voiceList");
@@ -78,15 +83,26 @@ document.getElementById("play").addEventListener("click", () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
-        /*languages.forEach((item, index) =>
+        voice = defaultLanguage;
+        languages.forEach((item, index) =>
         {
-            if(message.includes(`!${item}`))
-                voice = index;
-        });*/
+            if(message.includes(`!${item.lang}`))
+            {
+                voice = item.index;
+                message = message.substring(4, message.length);
+                console.log(languages[index]);
+            }
+                
+        });
         //console.log(message);
-        if(message === "!resetTTS" && tags["mod"] === true)
+
+        const resetRegex = /^\!resetTTS/;
+        if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
+        {
+            addCustomMessageToChatHistory(`${tags["display-name"]} reseted the TTS`);
             synth.cancel();
-        
+        }
+
         const commandsRegex = /^\!/;
         if(message.match(new RegExp(commandsRegex)))
            return;
@@ -94,29 +110,31 @@ document.getElementById("play").addEventListener("click", () =>
         const linkRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
         if(message.match(new RegExp(linkRegex)))
         {
-            handleMessage(tags["display-name"], tags["color"], `${tags["display-name"]} sent a link`);
+            message = message.replace(" ", "");
+            addLinkToChatHistory(tags["display-name"], message);
+            addToQueue(`${tags["display-name"]} sent a link`);
             return;
         }
 
         while(true)
         {
-            if((message.length <= 200 && message.lastIndexOf(" ") !== -1) || (message.length <= 100 && message.lastIndexOf(" ") === -1))
+            if((message.length <= 200 && message.lastIndexOf(" ") !== -1) || (message.length <= 50 && message.lastIndexOf(" ") === -1))
             {
                 addToChatHistory(tags["display-name"], tags["color"], message);
                 addToQueue(message);
                 break;
             }
             
-            let trimmedMessage = message.substring(0, Math.min(message.length, 100));
+            let trimmedMessage = message.substring(0, Math.min(message.length, 199));
             let lastSpaceIndex = trimmedMessage.lastIndexOf(" ");
-            if(lastSpaceIndex > 100)
+            if(lastSpaceIndex > 50)
             {
                 trimmedMessage = trimmedMessage.substring(0, lastSpaceIndex);
                 message = message.substring(trimmedMessage.length + 1, message.length);
             }
             else if(lastSpaceIndex === -1)
             {
-                trimmedMessage = trimmedMessage.substring(0, 99);
+                trimmedMessage = trimmedMessage.substring(0, 49);
                 message = message.substring(trimmedMessage.length, message.length);
             }
             
@@ -127,11 +145,46 @@ document.getElementById("play").addEventListener("click", () =>
 });
 
 let addToQueue = (message) =>
+    {
+        let utterance = new SpeechSynthesisUtterance(message);
+        utterance.voice = voices[voice];
+        utterance.volume = volume;
+        synth.speak(utterance);
+    }
+
+let addCustomMessageToChatHistory = (message) =>
 {
-    let utterance = new SpeechSynthesisUtterance(message);
-    utterance.voice = voices[voice];
-    utterance.volume = volume;
-    synth.speak(utterance);
+    let messageList = document.getElementById("messageList");
+    let div = document.createElement("div");
+
+    let messageSpan = document.createElement("span");
+    messageSpan.innerText = `${message}`;
+    messageSpan.style.color = "#ff3333";
+    messageSpan.style.fontWeight = "bold";
+    div.appendChild(messageSpan);
+    messageList.appendChild(div);
+}
+
+let addLinkToChatHistory = (nick, link) =>
+{
+    let messageList = document.getElementById("messageList");
+    let div = document.createElement("div");
+
+    let messageSpan = document.createElement("span");
+    messageSpan.innerText = `${nick} sent a link (`;
+    div.appendChild(messageSpan);
+
+    let linkElement = document.createElement("a");
+    linkElement.href = link;
+    linkElement.innerText = `${link}`;
+    linkElement.target = "_blank";
+    div.appendChild(linkElement);
+
+    let closeLinkSpan = document.createElement("span");
+    closeLinkSpan.innerText = `)`;
+    div.appendChild(closeLinkSpan);
+
+    messageList.appendChild(div);
 }
 
 let addToChatHistory = (name, color, message) =>
