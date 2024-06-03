@@ -1,6 +1,7 @@
 const synth = window.speechSynthesis;
 
 let voices;
+let languages = [];
 let channel = "kinessa__";
 let voice = 0;
 let volume = 100;
@@ -31,6 +32,8 @@ synth.onvoiceschanged = () =>
             voice = index;
         }
         voicesList.add(option);
+        if(item.name.includes("Google"))
+            languages.push(item.lang.substring(0, 1));
     });
 }
 
@@ -75,9 +78,18 @@ document.getElementById("play").addEventListener("click", () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
+        /*languages.forEach((item, index) =>
+        {
+            if(message.includes(`!${item}`))
+                voice = index;
+        });*/
+        //console.log(message);
+        if(message === "!resetTTS" && tags["mod"] === true)
+            synth.cancel();
+        
         const commandsRegex = /^\!/;
         if(message.match(new RegExp(commandsRegex)))
-            return;
+           return;
 
         const linkRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
         if(message.match(new RegExp(linkRegex)))
@@ -95,7 +107,7 @@ document.getElementById("play").addEventListener("click", () =>
                 break;
             }
             
-            let trimmedMessage = message.substring(0, Math.min(message.length, 199));
+            let trimmedMessage = message.substring(0, Math.min(message.length, 100));
             let lastSpaceIndex = trimmedMessage.lastIndexOf(" ");
             if(lastSpaceIndex > 100)
             {
