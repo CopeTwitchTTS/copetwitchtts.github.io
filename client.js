@@ -19,6 +19,7 @@ let clearSelect = (element) =>
 synth.onvoiceschanged = () =>
 {
     voices = synth.getVoices();
+    languages = [];
     let voicesList = document.getElementById("voiceList");
     clearSelect(voicesList);
 
