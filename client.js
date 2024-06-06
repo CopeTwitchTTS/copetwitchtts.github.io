@@ -45,6 +45,7 @@ let voiceList = document.getElementById("voiceList");
 voiceList.addEventListener("change", () =>
 {
     voice = voiceList.value;
+    defaultLanguage = voiceList.value;
 });
 
 let channelElement = document.getElementById("channel");
