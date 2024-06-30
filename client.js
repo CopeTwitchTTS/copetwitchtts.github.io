@@ -1,13 +1,10 @@
 const synth = window.speechSynthesis;
 
 let voices;
-let languages = [];
-let defaultLanguage = 0;
-let channel = "kinessa__";
 let voice = 0;
+let channel = "kinessa__";
 let volume = 100;
 let excluded = [ "Moobot" ];
-let messages = [];
 let client = undefined;
 
 let clearSelect = (element) =>
@@ -19,7 +16,6 @@ let clearSelect = (element) =>
 synth.onvoiceschanged = () =>
 {
     voices = synth.getVoices();
-    languages = [];
     let voicesList = document.getElementById("voiceList");
     clearSelect(voicesList);
 
@@ -28,17 +24,12 @@ synth.onvoiceschanged = () =>
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
-        if(item.name == "Google US English")
+        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)")
         {
             option.selected = true;
             voice = index;
-            defaultLanguage = index;
         }
         voicesList.add(option);
-        if(item.name.includes("Google") && !item.lang.includes("en"))
-            languages.push({
-                    lang: item.lang.substring(0, 2),
-                    index: index});
     });
 }
 
@@ -46,7 +37,6 @@ let voiceList = document.getElementById("voiceList");
 voiceList.addEventListener("change", () =>
 {
     voice = voiceList.value;
-    defaultLanguage = voiceList.value;
 });
 
 let channelElement = document.getElementById("channel");
@@ -84,18 +74,6 @@ document.getElementById("play").addEventListener("click", () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
-        voice = defaultLanguage;
-        languages.forEach((item, index) =>
-        {
-            if(message.includes(`!${item.lang}`))
-            {
-                voice = item.index;
-                message = message.substring(4, message.length);
-                console.log(languages[index]);
-            }
-                
-        });
-
         const resetRegex = /^\!resetTTS/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
@@ -116,31 +94,8 @@ document.getElementById("play").addEventListener("click", () =>
             return;
         }
 
-        while(true)
-        {
-            if((message.length <= 200 && message.lastIndexOf(" ") !== -1) || (message.length <= 50 && message.lastIndexOf(" ") === -1))
-            {
-                addToChatHistory(tags["display-name"], tags["color"], message);
-                addToQueue(message);
-                break;
-            }
-            
-            let trimmedMessage = message.substring(0, Math.min(message.length, 199));
-            let lastSpaceIndex = trimmedMessage.lastIndexOf(" ");
-            if(lastSpaceIndex > 50)
-            {
-                trimmedMessage = trimmedMessage.substring(0, lastSpaceIndex);
-                message = message.substring(trimmedMessage.length + 1, message.length);
-            }
-            else if(lastSpaceIndex === -1)
-            {
-                trimmedMessage = trimmedMessage.substring(0, 49);
-                message = message.substring(trimmedMessage.length, message.length);
-            }
-            
-            addToChatHistory(tags["display-name"], tags["color"], trimmedMessage);
-            addToQueue(trimmedMessage);
-        }
+        addToChatHistory(tags["display-name"], tags["color"], message);
+        addToQueue(message);
     });
 });
 
