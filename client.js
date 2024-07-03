@@ -79,6 +79,27 @@ document.getElementById("play").addEventListener("click", () =>
         {
             addCustomMessageToChatHistory(`${tags["display-name"]} reset the TTS`);
             synth.cancel();
+            return;
+        }
+
+        const playAudioRegex = /^\!play /;
+        if(message.match(new RegExp(playAudioRegex)))
+        {
+            message = message.replace(playAudioRegex, "");
+
+            let audioPlayer = document.getElementById("audioPlayer");
+            audioPlayer.src = message;
+
+            let checkInterval = setInterval(() =>
+            {
+                if(synth.speaking)
+                    return;
+            
+                clearInterval(checkInterval);
+                synth.pause();
+                audioPlayerPlay(audioPlayer);
+            }, 50);
+            return;
         }
 
         const commandsRegex = /^\!/;
@@ -99,13 +120,27 @@ document.getElementById("play").addEventListener("click", () =>
     });
 });
 
-let addToQueue = (message) =>
+let audioPlayerPlay = (audioPlayer) =>
+{
+    audioPlayer.play();
+    let interval = setInterval(() =>
     {
-        let utterance = new SpeechSynthesisUtterance(message);
-        utterance.voice = voices[voice];
-        utterance.volume = volume;
-        synth.speak(utterance);
-    }
+        if(!audioPlayer.ended)
+            return;
+    
+        synth.cancel();
+        clearInterval(interval);
+    }, 10)
+}
+
+let addToQueue = (message) =>
+{
+    let utterance = new SpeechSynthesisUtterance(message);
+    utterance.voice = voices[voice];
+    utterance.volume = volume;
+    synth.speak(utterance);
+    console.log("speak: " + message);
+}
 
 let addCustomMessageToChatHistory = (message) =>
 {
