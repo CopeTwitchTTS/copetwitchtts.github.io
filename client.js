@@ -1,6 +1,7 @@
 const synth = window.speechSynthesis;
 
 let voices;
+let messages = [];
 let voice = 0;
 let channel = "kinessa__";
 let volume = 100;
@@ -51,7 +52,7 @@ volumeElement.addEventListener("change", () =>
     volume = volumeElement.value;
 });
 
-document.getElementById("play").addEventListener("click", () =>
+let play = () =>
 {
     synth.cancel();
     
@@ -74,31 +75,20 @@ document.getElementById("play").addEventListener("click", () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
-        const resetRegex = /^\!resetTTS/;
+        const resetRegex = /^\!reset/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
             addCustomMessageToChatHistory(`${tags["display-name"]} reset the TTS`);
+            messages = [];
             synth.cancel();
             return;
         }
 
-        const playAudioRegex = /^\!play /;
-        if(message.match(new RegExp(playAudioRegex)))
+        const skipRegex = /^\!skip/;
+        if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
-            message = message.replace(playAudioRegex, "");
-
-            let audioPlayer = document.getElementById("audioPlayer");
-            audioPlayer.src = message;
-
-            let checkInterval = setInterval(() =>
-            {
-                if(synth.speaking)
-                    return;
-            
-                clearInterval(checkInterval);
-                synth.pause();
-                audioPlayerPlay(audioPlayer);
-            }, 50);
+            addCustomMessageToChatHistory(`${tags["display-name"]} skipped a message`);
+            synth.cancel();
             return;
         }
 
@@ -116,22 +106,16 @@ document.getElementById("play").addEventListener("click", () =>
         }
 
         addToChatHistory(tags["display-name"], tags["color"], message);
-        addToQueue(message);
+        messages.push(message);
     });
-});
-
-let audioPlayerPlay = (audioPlayer) =>
-{
-    audioPlayer.play();
-    let interval = setInterval(() =>
-    {
-        if(!audioPlayer.ended)
-            return;
-    
-        synth.cancel();
-        clearInterval(interval);
-    }, 10)
 }
+
+play();
+
+document.getElementById("play").addEventListener("click", () =>
+{
+    play();
+});
 
 let addToQueue = (message) =>
 {
@@ -139,7 +123,6 @@ let addToQueue = (message) =>
     utterance.voice = voices[voice];
     utterance.volume = volume;
     synth.speak(utterance);
-    console.log("speak: " + message);
 }
 
 let addCustomMessageToChatHistory = (message) =>
@@ -192,15 +175,23 @@ let addToChatHistory = (name, color, message) =>
     messageList.appendChild(div);
 }
 
+setInterval(() => 
+{
+    if(!synth.speaking && messages.length)
+    {
+        addToQueue(messages[0]);
+        messages.shift();
+    }
+}, 5);
+
 document.getElementById("skip").addEventListener("click", () =>
 {
     synth.cancel();
 });
 
-document.getElementById("stop").addEventListener("click", () =>
+document.getElementById("reset").addEventListener("click", () =>
 {
-    if(client !== undefined)
-        client.disconnect();
+    messages = [];
     synth.cancel();
 });
 
