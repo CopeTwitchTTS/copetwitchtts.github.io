@@ -1,27 +1,28 @@
 body
 {
     background: #101010;
+    overflow: hidden;
 }
 
-.menu
+.navbar
 {
     position: absolute;
+    top: 0;
     left: 0;
-    width: 12.5vw;
-    height: 100vh;
-    background: #262626;
+    width: 100vw;
+    height: 6vh;
 }
 
 
-.title
+.navbar .title
 {
-    position: relative;
+    position: absolute;
     width: 12.5vw;
     height: 6vh;
     background: #212121;
 }
 
-.title h2
+.navbar .title h2
 {
     position: absolute;
     left: 50%;
@@ -31,51 +32,94 @@ body
 }
 
 
-.buttons
+.pages
+{
+    position: absolute;
+    top: 0;
+    left: 12.5vw;
+    width: 87.5vw;
+    height: 6vh;
+    display: flex;
+    background: #262626;
+    color: white;
+    justify-content: right;
+    align-items: center;
+}
+
+.pages h3
+{
+    float: right;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 3vw;
+}
+
+.currentPage
+{
+    color: #0d6efd;
+}
+
+.pages h3:hover
+{
+    color: #0d6efd;
+}
+
+
+#ttsPage .menu
+{
+    position: absolute;
+    top: 6vh;
+    left: 0;
+    width: 12.5vw;
+    height: 100vh;
+    background: #262626;
+}
+
+#ttsPage .buttons
 {
     position: relative;
     width: 12.5vw;
     padding: 1vw;
 }
 
-.buttons button
+#ttsPage .buttons button
 {
     width: 100%;
     margin-bottom: 1vh;
 }
 
 
-.settings
+#ttsPage .settings
 {
     position: relative;
     width: 12.5vw;
     padding: 1vw;
 }
 
-button
+#ttsPage button
 {
     width: 100%;
     margin-bottom: 1vh;
 }
 
-#voiceList
+#ttsPage #voiceList
 {
     width: 100%;
     margin-bottom: 1vh;
 }
 
-.volumeSettings
+#ttsPage .volumeSettings
 {
     color: white;
 }
 
-.volumeSettings label, .volumeSettings input
+#ttsPage .volumeSettings label, .volumeSettings input
 {
     width: 100%;
 }
 
 
-.excludeSettings
+#ttsPage .excludeSettings
 {
     position: relative;
     width: 12.5vw;
@@ -83,13 +127,13 @@ button
     color: white;
 }
 
-.excludeSettings input, .excludeSettings button
+#ttsPage .excludeSettings input, .excludeSettings button
 {
     margin-bottom: 1vh;
 }
 
 
-#excludedList
+#ttsPage #excludedList
 {
     position: relative;
     width: 12.5vw;
@@ -98,17 +142,18 @@ button
     padding: 1vw;
 }
 
-#excludedList button
+#ttsPage #excludedList button
 {
     width: 100%;
 }
 
 
-#messageList
+#ttsPage #messageList
 {
     position: absolute;
+    top: 7vh;
     left: 12.5vw;
-    height: 100vh;
+    height: 93vh;
     width: 87.5vw;
     padding: 1vw;
     overflow-y: scroll;
@@ -135,4 +180,21 @@ button
 ::-webkit-scrollbar-thumb:hover
 {
     background: #595959; 
+}
+
+
+
+
+
+#srPage #player
+{
+    position: absolute;
+    right: 10vw;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+#srPage #songs
+{
+    overflow-y: scroll;
 }

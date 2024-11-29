@@ -1,17 +1,27 @@
 const synth = window.speechSynthesis;
 
 let voices;
-let messages = [];
 let voice = 0;
-let channel = "kinessa__";
+let channel = "anonimsko";
 let volume = 100;
 let excluded = [ "Moobot" ];
 let client = undefined;
+
+let songs = [];
+var player;
 
 let clearSelect = (element) =>
 {
     for(let i = element.options.length - 1; i >= 0; i--)
         element.remove(i);
+}
+
+window.onload = (event) =>
+{
+    let ttsPage = document.getElementById("ttsPage");
+    let srPage = document.getElementById("srPage");
+
+    //ttsPage.style.display = "none";
 }
 
 synth.onvoiceschanged = () =>
@@ -52,7 +62,7 @@ volumeElement.addEventListener("change", () =>
     volume = volumeElement.value;
 });
 
-let play = () =>
+document.getElementById("play").addEventListener("click", () =>
 {
     synth.cancel();
     
@@ -75,20 +85,44 @@ let play = () =>
         if(excluded.includes(tags["display-name"]))
             return;
 
-        const resetRegex = /^\!reset/;
+        const resetRegex = /^\!resetTTS/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
             addCustomMessageToChatHistory(`${tags["display-name"]} reset the TTS`);
-            messages = [];
             synth.cancel();
             return;
         }
 
-        const skipRegex = /^\!skip/;
-        if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
+        const playAudioRegex = /^\!play /;
+        if(message.match(new RegExp(playAudioRegex)))
         {
-            addCustomMessageToChatHistory(`${tags["display-name"]} skipped a message`);
-            synth.cancel();
+            message = message.replace(playAudioRegex, "");
+
+            let audioPlayer = document.getElementById("audioPlayer");
+            audioPlayer.src = message;
+
+            let checkInterval = setInterval(() =>
+            {
+                if(synth.speaking)
+                    return;
+            
+                clearInterval(checkInterval);
+                synth.pause();
+                audioPlayerPlay(audioPlayer);
+            }, 50);
+            return;
+        }
+
+        const songRequestRegex = /^\!sr /;
+        if(message.match(new RegExp(songRequestRegex)))
+        {
+            message = message.replace(songRequestRegex, "");
+
+            let id = extractIdFromLink(message);
+            songs.push(id);
+            if(songs.length == 0)
+                player.loadVideoById(id);
+
             return;
         }
 
@@ -106,16 +140,22 @@ let play = () =>
         }
 
         addToChatHistory(tags["display-name"], tags["color"], message);
-        messages.push(message);
+        addToQueue(message);
     });
-}
-
-play();
-
-document.getElementById("play").addEventListener("click", () =>
-{
-    play();
 });
+
+let audioPlayerPlay = (audioPlayer) =>
+{
+    audioPlayer.play();
+    let interval = setInterval(() =>
+    {
+        if(!audioPlayer.ended)
+            return;
+    
+        synth.cancel();
+        clearInterval(interval);
+    }, 10)
+}
 
 let addToQueue = (message) =>
 {
@@ -123,6 +163,7 @@ let addToQueue = (message) =>
     utterance.voice = voices[voice];
     utterance.volume = volume;
     synth.speak(utterance);
+    console.log("speak: " + message);
 }
 
 let addCustomMessageToChatHistory = (message) =>
@@ -175,23 +216,15 @@ let addToChatHistory = (name, color, message) =>
     messageList.appendChild(div);
 }
 
-setInterval(() => 
-{
-    if(!synth.speaking && messages.length)
-    {
-        addToQueue(messages[0]);
-        messages.shift();
-    }
-}, 5);
-
 document.getElementById("skip").addEventListener("click", () =>
 {
     synth.cancel();
 });
 
-document.getElementById("reset").addEventListener("click", () =>
+document.getElementById("stop").addEventListener("click", () =>
 {
-    messages = [];
+    if(client !== undefined)
+        client.disconnect();
     synth.cancel();
 });
 
@@ -225,4 +258,83 @@ let removeDefaultExcluded = (element) =>
 {
     excluded.splice(excluded.indexOf(element.value), 1);
     element.remove();
+}
+
+
+
+
+
+
+
+
+var tag = document.createElement("script");
+
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName("script")[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+let extractIdFromLink = (link) =>
+{
+    let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    let match = link.match(regExp);
+    console.log(match[2]);
+    if (match && match[2].length == 11)
+        return match[2];
+    else
+        console.error("Failed to extract the video Id");
+}
+
+function onYouTubeIframeAPIReady()
+{
+    console.log("run")
+    player = new YT.Player("player",
+    {
+        height: "40%",
+        width: "35%",
+        videoId: "wyYNDI1kgYY",
+        playerVars:
+        { 
+            "autoplay": 1
+        },
+        events:
+        {
+            "onReady": onPlayerReady,
+            "onStateChange": onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event)
+{
+    event.target.playVideo();
+}
+
+function onPlayerStateChange(event)
+{
+    if (event.data != YT.PlayerState.ENDED)
+        return;
+
+    songs.shift();
+
+    if(songs.length == 0)
+        return;
+
+    let id = extractIdFromLink(songs[0]);
+    player.loadVideoById(id);
+}
+
+let addSongToList = (id) =>
+{
+    let songList = document.getElementById("songs");
+
+    let div = document.createElement("div");
+    let nickSpan = document.createElement("span");
+    nickSpan.innerText = `${name}`;
+    nickSpan.style.color = color;
+    div.appendChild(nickSpan);
+
+    let messageSpan = document.createElement("span");
+    messageSpan.innerText = `: ${message}`;
+    div.appendChild(messageSpan);
+    songList.appendChild(div);
 }

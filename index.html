@@ -13,45 +13,63 @@
 </head>
 <body>
     
-    <div class="menu">
+    <div class="navbar">
         <div class="title">
             <h2>Cope TTS</h2>
         </div>
-        
-        <div class="buttons">
-            <button class="btn btn-success" id="play">Play</button>
-            <button class="btn btn-warning" id="skip">Skip Message</button>
-            <button class="btn btn-danger" id="reset">Reset</button>
-        </div>
 
-        <div class="settings">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon3">twitch.tv/</span>
-                </div>
-                <input type="text" class="form-control" id="channel" value="kinessa__">
-            </div>
-
-            <select id="voiceList" class="form-select">
-            </select>
-
-            <div class="volumeSettings">
-                <label for="volume">Volume</label>
-                <input type="range" min="1" max="100" step="1" value="100" id="volume">
-            </div>
-        </div>
-
-        <div class="excludeSettings">
-            <input type="text" placeholder="Exclude User" class="form-control" id="excludeName">
-            <button class="btn btn-primary" id="exclude">Exclude</button>
-        </div>
-        <div id="excludedList">
-            <button class="btn btn-light" onclick="removeDefaultExcluded(this)" value="Moobot">Moobot</button>
+        <div class="pages">
+            <h3 class="currentPage">Text To Speech</h3>
+            <h3>Song Request</h3>
         </div>
     </div>
 
-    <div id="messageList">
+    <div id="ttsPage">
+        <div class="menu">
 
+            <div class="buttons">
+                <button class="btn btn-success" id="play">Play</button>
+                <button class="btn btn-warning" id="skip">Skip Messages</button>
+                <button class="btn btn-danger" id="stop">Stop</button>
+            </div>
+    
+            <div class="settings">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">twitch.tv/</span>
+                    </div>
+                    <input type="text" class="form-control" id="channel" value="kinessa__">
+                </div>
+    
+                <select id="voiceList" class="form-select">
+                </select>
+    
+                <div class="volumeSettings">
+                    <label for="volume">Volume</label>
+                    <input type="range" min="1" max="100" step="1" value="100" id="volume">
+                </div>
+            </div>
+    
+            <div class="excludeSettings">
+                <input type="text" placeholder="Exclude User" class="form-control" id="excludeName">
+                <button class="btn btn-primary" id="exclude">Exclude</button>
+            </div>
+            <div id="excludedList">
+                <button class="btn btn-light" onclick="removeDefaultExcluded(this)" value="Moobot">Moobot</button>
+            </div>
+        </div>
+    
+        <div id="messageList">
+    
+        </div>    
+    </div>
+
+    <div id="srPage">
+        <div id="songs">
+            
+        </div>
+
+        <div id="player"></div>
     </div>
 
     <audio id="audioPlayer"></audio>
