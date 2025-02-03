@@ -51,9 +51,8 @@ volumeElement.addEventListener("change", () =>
     volume = volumeElement.value;
 });
 
-document.getElementById("play").addEventListener("click", () =>
-{
-    synth.cancel();
+let play = () =>
+{   synth.cancel();
     
     if(client !== undefined)
         client.disconnect();
@@ -82,26 +81,6 @@ document.getElementById("play").addEventListener("click", () =>
             return;
         }
 
-        const playAudioRegex = /^\!play /;
-        if(message.match(new RegExp(playAudioRegex)))
-        {
-            message = message.replace(playAudioRegex, "");
-
-            let audioPlayer = document.getElementById("audioPlayer");
-            audioPlayer.src = message;
-
-            let checkInterval = setInterval(() =>
-            {
-                if(synth.speaking)
-                    return;
-            
-                clearInterval(checkInterval);
-                synth.pause();
-                audioPlayerPlay(audioPlayer);
-            }, 50);
-            return;
-        }
-
         const commandsRegex = /^\!/;
         if(message.match(new RegExp(commandsRegex)))
            return;
@@ -118,20 +97,13 @@ document.getElementById("play").addEventListener("click", () =>
         addToChatHistory(tags["display-name"], tags["color"], message);
         addToQueue(message);
     });
-});
-
-let audioPlayerPlay = (audioPlayer) =>
-{
-    audioPlayer.play();
-    let interval = setInterval(() =>
-    {
-        if(!audioPlayer.ended)
-            return;
-    
-        synth.cancel();
-        clearInterval(interval);
-    }, 10)
 }
+
+play();
+
+document.getElementById("play").addEventListener("click", () =>
+    play()
+ );
 
 let addToQueue = (message) =>
 {
@@ -139,7 +111,6 @@ let addToQueue = (message) =>
     utterance.voice = voices[voice];
     utterance.volume = volume;
     synth.speak(utterance);
-    console.log("speak: " + message);
 }
 
 let addCustomMessageToChatHistory = (message) =>
@@ -184,6 +155,7 @@ let addToChatHistory = (name, color, message) =>
     let nickSpan = document.createElement("span");
     nickSpan.innerText = `${name}`;
     nickSpan.style.color = color;
+    nickSpan.style.fontWeight = "bold";
     div.appendChild(nickSpan);
 
     let messageSpan = document.createElement("span");
