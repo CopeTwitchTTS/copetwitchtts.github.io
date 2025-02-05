@@ -1,7 +1,7 @@
 const synth = window.speechSynthesis;
 
 let voices;
-let voice = 0;
+let voice = undefined;
 let channel = "kinessa__";
 let volume = 100;
 let excluded = [ "Moobot" ];
@@ -24,13 +24,19 @@ synth.onvoiceschanged = () =>
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
-        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)")
+        if(item.name == "Microsoft Ava Online (Natural) - English (United States)" && voice === undefined)
         {
             option.selected = true;
             voice = index;
         }
         voicesList.add(option);
     });
+
+    if(voice === undefined)
+        voice = 0;
+
+    if (client === undefined)
+        play();
 }
 
 let voiceList = document.getElementById("voiceList");
@@ -48,14 +54,16 @@ channelElement.addEventListener("change", () =>
 let volumeElement = document.getElementById("volume");
 volumeElement.addEventListener("change", () =>
 {
-    volume = volumeElement.value;
+    volume = volumeElement.value / 100;
 });
 
 let play = () =>
-{   synth.cancel();
-    
+{   
     if(client !== undefined)
+    {
+        synth.cancel();
         client.disconnect();
+    } 
 
     client = new tmi.Client(
     {
@@ -99,11 +107,7 @@ let play = () =>
     });
 }
 
-play();
-
-document.getElementById("play").addEventListener("click", () =>
-    play()
- );
+document.getElementById("play").addEventListener("click", play);
 
 let addToQueue = (message) =>
 {
@@ -132,18 +136,20 @@ let addLinkToChatHistory = (nick, link) =>
     let div = document.createElement("div");
 
     let messageSpan = document.createElement("span");
-    messageSpan.innerText = `${nick} sent a link (`;
+    messageSpan.style.color = "#ff9b29";
+    messageSpan.style.fontWeight = "bold";
+    messageSpan.innerText = `${nick} sent a link`;
     div.appendChild(messageSpan);
+
+    let colon = document.createElement("span");
+    colon.innerText = `: `;
+    div.appendChild(colon);
 
     let linkElement = document.createElement("a");
     linkElement.href = link;
     linkElement.innerText = `${link}`;
     linkElement.target = "_blank";
     div.appendChild(linkElement);
-
-    let closeLinkSpan = document.createElement("span");
-    closeLinkSpan.innerText = `)`;
-    div.appendChild(closeLinkSpan);
 
     messageList.appendChild(div);
 }
