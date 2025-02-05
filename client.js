@@ -2,7 +2,8 @@ const synth = window.speechSynthesis;
 
 let voices;
 let voice = undefined;
-let jesusChristoVoice = undefined;
+let multilingualVoice = undefined;
+let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ" ];
 let channel = "kinessa__";
 let volume = 100;
 let excluded = [ "Moobot" ];
@@ -30,8 +31,8 @@ synth.onvoiceschanged = () =>
             option.selected = true;
             voice = index;
         }
-        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)" && jesusChristoVoice === undefined)
-            jesusChristoVoice = index;
+        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)" && multilingualVoice === undefined)
+            multilingualVoice = index;
         voicesList.add(option);
     });
 
@@ -115,7 +116,7 @@ let addToQueue = (message) =>
 {
     let utterance = new SpeechSynthesisUtterance(message);
     utterance.volume = volume;
-    utterance.voice = (message == "jesus christo" && jesusChristoVoice !== undefined) ? voices[jesusChristoVoice] : voices[voice];
+    utterance.voice = (sentencesForMultilingual.includes(message.toLowerCase()) && multilingualVoice !== undefined) ? voices[multilingualVoice] : voices[voice];
     synth.speak(utterance);
 }
 
