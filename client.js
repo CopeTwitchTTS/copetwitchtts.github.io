@@ -2,6 +2,7 @@ const synth = window.speechSynthesis;
 
 let voices;
 let voice = undefined;
+let jesusChristoVoice = undefined;
 let channel = "kinessa__";
 let volume = 100;
 let excluded = [ "Moobot" ];
@@ -29,6 +30,8 @@ synth.onvoiceschanged = () =>
             option.selected = true;
             voice = index;
         }
+        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)" && jesusChristoVoice === undefined)
+            jesusChristoVoice = index;
         voicesList.add(option);
     });
 
@@ -111,8 +114,8 @@ document.getElementById("play").addEventListener("click", play);
 let addToQueue = (message) =>
 {
     let utterance = new SpeechSynthesisUtterance(message);
-    utterance.voice = voices[voice];
     utterance.volume = volume;
+    utterance.voice = (message == "jesus christo" && jesusChristoVoice !== undefined) ? voices[jesusChristoVoice] : voices[voice];
     synth.speak(utterance);
 }
 
