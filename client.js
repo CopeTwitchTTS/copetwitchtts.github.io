@@ -24,7 +24,7 @@ synth.onvoiceschanged = () =>
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
-        if(item.name == "Microsoft Ava Online (Natural) - English (United States)" && voice === undefined)
+        if(item.name == "Microsoft Emily Online (Natural) - English (Ireland)" && voice === undefined)
         {
             option.selected = true;
             voice = index;
@@ -34,9 +34,6 @@ synth.onvoiceschanged = () =>
 
     if(voice === undefined)
         voice = 0;
-
-    if (client === undefined)
-        play();
 }
 
 let voiceList = document.getElementById("voiceList");
@@ -106,6 +103,8 @@ let play = () =>
         addToQueue(message);
     });
 }
+
+play();
 
 document.getElementById("play").addEventListener("click", play);
 
