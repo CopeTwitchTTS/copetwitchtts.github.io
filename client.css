@@ -89,6 +89,18 @@ button
 }
 
 
+.excludedLabel
+{
+    position: relative;
+    width: 12.5vw;
+    margin: 0;
+    padding-left: 1vw;
+    padding-top: 1vw;
+    font-size: 2vh;
+    color: white;
+    font-weight: bold;
+}
+
 #excludedList
 {
     position: relative;

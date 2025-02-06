@@ -5,8 +5,9 @@ let voice = undefined;
 let multilingualVoice = undefined;
 let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys" ];
 let channel = "kinessa__";
-let volume = 100;
-let excluded = [ "Moobot" ];
+let volume = 1;
+let excluded = [];
+let excludedButtons = [];
 let client = undefined;
 
 let clearSelect = (element) =>
@@ -40,22 +41,19 @@ synth.onvoiceschanged = () =>
         voice = 0;
 }
 
-let voiceList = document.getElementById("voiceList");
-voiceList.addEventListener("change", () =>
+document.getElementById("voiceList").addEventListener("change", (e) =>
 {
-    voice = voiceList.value;
+    voice = e.currentTarget.value;
 });
 
-let channelElement = document.getElementById("channel");
-channelElement.addEventListener("change", () =>
+document.getElementById("channel").addEventListener("change", (e) =>
 {
-    channel = channelElement.value;
+    channel = e.currentTarget.value;
 });
 
-let volumeElement = document.getElementById("volume");
-volumeElement.addEventListener("change", () =>
+document.getElementById("volume").addEventListener("change", (e) =>
 {
-    volume = volumeElement.value / 100;
+    volume = e.currentTarget.value / 100;
 });
 
 let play = () =>
@@ -80,8 +78,11 @@ let play = () =>
     client.on("message", (channel, tags, message, self) =>
     {
         if(excluded.includes(tags["display-name"]))
+        {
+            addWithFlagToChatHistory("MUTED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
             return;
-
+        }
+        
         const resetRegex = /^\!resetTTS/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
@@ -90,9 +91,34 @@ let play = () =>
             return;
         }
 
+        const muteRegex = /^\!mute\s/;
+        if(message.match(new RegExp(muteRegex)) && tags["mod"] === true)
+        {
+            message = message.replace(muteRegex, "");
+            if(message == "Anonimsko")
+                return;
+            createExcludedButton(message);
+            addCustomMessageToChatHistory(`${tags["display-name"]} muted user "${message}"`);
+            return;
+        }
+
+        const unmuteRegex = /^\!unmute\s/;
+        if(message.match(new RegExp(unmuteRegex)) && tags["mod"] === true)
+        {
+            message = message.replace(unmuteRegex, "");
+            excludedButtons[excluded.indexOf(message)].remove();
+            excludedButtons.splice(excluded.indexOf(message), 1);
+            excluded.splice(excluded.indexOf(message), 1);
+            addCustomMessageToChatHistory(`${tags["display-name"]} unmuted user "${message}"`);
+            return;
+        }
+
         const commandsRegex = /^\!/;
         if(message.match(new RegExp(commandsRegex)))
-           return;
+        {
+            addWithFlagToChatHistory("IGNORED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
+            return;
+        }
 
         const linkRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
         if(message.match(new RegExp(linkRegex)))
@@ -118,6 +144,29 @@ let addToQueue = (message) =>
     utterance.volume = volume;
     utterance.voice = (sentencesForMultilingual.includes(message.toLowerCase()) && multilingualVoice !== undefined) ? voices[multilingualVoice] : voices[voice];
     synth.speak(utterance);
+}
+
+let addWithFlagToChatHistory = (flag, flagColor, name, nameColor, message) =>
+{
+    let messageList = document.getElementById("messageList");
+    let div = document.createElement("div");
+
+    let flagSpan = document.createElement("span");
+    flagSpan.innerText = `[${flag}] `;
+    flagSpan.style.color = flagColor;
+    flagSpan.style.fontWeight = "bold";
+    div.appendChild(flagSpan);
+
+    let nickSpan = document.createElement("span");
+    nickSpan.innerText = `${name}`;
+    nickSpan.style.color = nameColor;
+    nickSpan.style.fontWeight = "bold";
+    div.appendChild(nickSpan);
+
+    let messageSpan = document.createElement("span");
+    messageSpan.innerText = `: ${message}`;
+    div.appendChild(messageSpan);
+    messageList.appendChild(div);
 }
 
 let addCustomMessageToChatHistory = (message) =>
@@ -191,6 +240,14 @@ document.getElementById("exclude").addEventListener("click", () =>
     let name = nameInput.value;
     nameInput.value = "";
 
+    createExcludedButton(name);
+});
+
+let createExcludedButton = (name) =>
+{
+    if(name == "Anonimsko")
+        return;
+
     if(excluded.includes(name))
         return;
 
@@ -203,16 +260,13 @@ document.getElementById("exclude").addEventListener("click", () =>
     let button = document.createElement("button");
     button.innerText = name;
     button.setAttribute("class", "btn btn-light");
+    button.setAttribute("id", "btn btn-light");
     button.addEventListener("click", () =>
     {
         excluded.splice(excluded.indexOf(name), 1);
         button.remove();
     });
+    excludedButtons.push(button);
     excludedList.appendChild(button);
-});
-
-let removeDefaultExcluded = (element) =>
-{
-    excluded.splice(excluded.indexOf(element.value), 1);
-    element.remove();
 }
+createExcludedButton("Moobot");
