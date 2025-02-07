@@ -10,6 +10,8 @@ let excluded = [];
 let excludedButtons = [];
 let client = undefined;
 
+console.log(document.cookie);
+
 let setCookie = (name, value, daysTillExpire) =>
 {
     const date = new Date();
