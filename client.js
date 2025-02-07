@@ -15,7 +15,7 @@ let loadSavedSettings = () =>
     channel = localStorage.getItem("channel");
     document.getElementById("channel").value = channel;
     volume = localStorage.getItem("volume");
-    document.getElementById("volume").value = volume;
+    document.getElementById("volume").value = volume * 100;
 }
 loadSavedSettings();
 
