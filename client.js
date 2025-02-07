@@ -4,11 +4,20 @@ let voices;
 let voice = undefined;
 let multilingualVoice = undefined;
 let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys" ];
-let channel = "kinessa__";
-let volume = 1;
+let channel = undefined;
+let volume = undefined;
 let excluded = [];
 let excludedButtons = [];
 let client = undefined;
+
+let setCookie = (name, value, daysTillExpire) =>
+{
+    const date = new Date();
+    date.setTime(date.getTime() + daysTillExpire * 24 * 60 * 60 * 1000);
+
+    document.cookie = `${name} = ${value}; expires = ${date.toUTCString()}; path=/`;
+    console.log(`${name} = ${value}; expires = ${date.toUTCString()}; path=/`)
+}
 
 let clearSelect = (element) =>
 {
@@ -53,20 +62,26 @@ synth.onvoiceschanged = () =>
 document.getElementById("voiceList").addEventListener("change", (e) =>
 {
     voice = e.currentTarget.value;
+    setCookie("voice", voices[voice].name, 365);
 });
 
 document.getElementById("channel").addEventListener("change", (e) =>
 {
     channel = e.currentTarget.value;
+    setCookie("channel", channel, 365);
 });
 
 document.getElementById("volume").addEventListener("change", (e) =>
 {
     volume = e.currentTarget.value / 100;
+    setCookie("volume", volume, 365);
 });
 
 let play = () =>
 {   
+    if(channel === undefined)
+        return;
+
     if(client !== undefined)
     {
         synth.cancel();
