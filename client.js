@@ -10,9 +10,11 @@ let excluded = [];
 let excludedButtons = [];
 let client = undefined;
 
-console.log(localStorage.getItem('voice'));
-console.log(localStorage.getItem('channel'));
-console.log(localStorage.getItem('volume'));
+let loadSavedSettings = () =>
+{
+    document.getElementById("channel").value = localStorage.getItem("channel");
+    document.getElementById("volume").value = localStorage.getItem("volume");
+}
 
 let clearSelect = (element) =>
 {
