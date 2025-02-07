@@ -15,6 +15,7 @@ let loadSavedSettings = () =>
     document.getElementById("channel").value = localStorage.getItem("channel");
     document.getElementById("volume").value = localStorage.getItem("volume");
 }
+loadSavedSettings();
 
 let clearSelect = (element) =>
 {
