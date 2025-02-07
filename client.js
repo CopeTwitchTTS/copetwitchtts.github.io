@@ -10,16 +10,9 @@ let excluded = [];
 let excludedButtons = [];
 let client = undefined;
 
-console.log(document.cookie);
-
-let setCookie = (name, value, daysTillExpire) =>
-{
-    const date = new Date();
-    date.setTime(date.getTime() + daysTillExpire * 24 * 60 * 60 * 1000);
-
-    document.cookie = `${name} = ${value}; expires = ${date.toUTCString()}; path=/`;
-    console.log(`${name} = ${value}; expires = ${date.toUTCString()}; path=/`)
-}
+console.log(localStorage.getItem('voice'));
+console.log(localStorage.getItem('channel'));
+console.log(localStorage.getItem('volume'));
 
 let clearSelect = (element) =>
 {
@@ -42,7 +35,7 @@ synth.onvoiceschanged = () =>
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
 
-        if(item.name == "Microsoft Emily Online (Natural) - English (Ireland)" && voice === undefined)
+        if(item.name == localStorage.getItem("voice") && voice === undefined)
         {
             option.selected = true;
             voice = index;
@@ -64,19 +57,19 @@ synth.onvoiceschanged = () =>
 document.getElementById("voiceList").addEventListener("change", (e) =>
 {
     voice = e.currentTarget.value;
-    setCookie("voice", voices[voice].name, 365);
+    localStorage.setItem("voice", voices[voice].name);
 });
 
 document.getElementById("channel").addEventListener("change", (e) =>
 {
     channel = e.currentTarget.value;
-    setCookie("channel", channel, 365);
+    localStorage.setItem("channel", channel);
 });
 
 document.getElementById("volume").addEventListener("change", (e) =>
 {
     volume = e.currentTarget.value / 100;
-    setCookie("volume", volume, 365);
+    localStorage.setItem("volume", volume);
 });
 
 let play = () =>
