@@ -12,8 +12,10 @@ let client = undefined;
 
 let loadSavedSettings = () =>
 {
-    document.getElementById("channel").value = localStorage.getItem("channel");
-    document.getElementById("volume").value = localStorage.getItem("volume");
+    channel = localStorage.getItem("channel");
+    document.getElementById("channel").value = channel;
+    volume = localStorage.getItem("volume");
+    document.getElementById("volume").value = volume;
 }
 loadSavedSettings();
 
