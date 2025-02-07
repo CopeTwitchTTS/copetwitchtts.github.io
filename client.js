@@ -22,23 +22,32 @@ synth.onvoiceschanged = () =>
     let voicesList = document.getElementById("voiceList");
     clearSelect(voicesList);
 
+    voice = undefined;
+    multilingualVoice = undefined;
+
     voices.forEach((item, index) =>
     {
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
+
         if(item.name == "Microsoft Emily Online (Natural) - English (Ireland)" && voice === undefined)
         {
             option.selected = true;
             voice = index;
         }
+
         if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)" && multilingualVoice === undefined)
             multilingualVoice = index;
+
         voicesList.add(option);
     });
 
     if(voice === undefined)
+    {
+        voicesList.value = 0;
         voice = 0;
+    }
 }
 
 document.getElementById("voiceList").addEventListener("change", (e) =>
@@ -77,12 +86,6 @@ let play = () =>
 
     client.on("message", (channel, tags, message, self) =>
     {
-        if(excluded.includes(tags["display-name"]))
-        {
-            addWithFlagToChatHistory("MUTED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
-            return;
-        }
-        
         const resetRegex = /^\!resetTTS/;
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
@@ -97,6 +100,7 @@ let play = () =>
             message = message.replace(muteRegex, "");
             if(message == "Anonimsko")
                 return;
+
             createExcludedButton(message);
             addCustomMessageToChatHistory(`${tags["display-name"]} muted user "${message}"`);
             return;
@@ -117,6 +121,12 @@ let play = () =>
         if(message.match(new RegExp(commandsRegex)))
         {
             addWithFlagToChatHistory("IGNORED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
+            return;
+        }
+
+        if(excluded.includes(tags["display-name"]))
+        {
+            addWithFlagToChatHistory("MUTED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
             return;
         }
 
