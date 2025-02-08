@@ -3,7 +3,7 @@ const synth = window.speechSynthesis;
 let voices;
 let voice = undefined;
 let multilingualVoice = undefined;
-let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys" ];
+let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an L" ];
 let channel = undefined;
 let volume = undefined;
 let excluded = [];
@@ -113,7 +113,7 @@ let play = () =>
         if(message.match(new RegExp(muteRegex)) && tags["mod"] === true)
         {
             message = message.replace(muteRegex, "");
-            if(message == "Anonimsko")
+            if(message == "Anonimsko" || excluded.includes(message))
                 return;
 
             createExcludedButton(message);
@@ -125,6 +125,9 @@ let play = () =>
         if(message.match(new RegExp(unmuteRegex)) && tags["mod"] === true)
         {
             message = message.replace(unmuteRegex, "");
+            if(!excluded.includes(message))
+                return;
+
             excludedButtons[excluded.indexOf(message)].remove();
             excludedButtons.splice(excluded.indexOf(message), 1);
             excluded.splice(excluded.indexOf(message), 1);
@@ -165,6 +168,9 @@ document.getElementById("play").addEventListener("click", play);
 
 let addToQueue = (message) =>
 {
+    if(message.toLowerCase().charCodeAt(message.length - 1) == 56320)
+        message = message.substring(0, message.length - 3);
+
     let utterance = new SpeechSynthesisUtterance(message);
     utterance.volume = volume;
     utterance.voice = (sentencesForMultilingual.includes(message.toLowerCase()) && multilingualVoice !== undefined) ? voices[multilingualVoice] : voices[voice];
