@@ -5,17 +5,23 @@ let voice = undefined;
 let multilingualVoice = undefined;
 let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an L" ];
 let channel = undefined;
-let volume = undefined;
+let volume = 0.5;
 let excluded = [];
 let excludedButtons = [];
 let client = undefined;
 
 let loadSavedSettings = () =>
 {
-    channel = localStorage.getItem("channel");
-    document.getElementById("channel").value = channel;
-    volume = localStorage.getItem("volume");
-    document.getElementById("volume").value = volume * 100;
+    if(localStorage.getItem("channel") !== null)
+    {
+        channel = localStorage.getItem("channel");
+        document.getElementById("channel").value = channel;
+    }
+    if(localStorage.getItem("volume") !== null)
+    {
+        volume = localStorage.getItem("volume");
+        document.getElementById("volume").value = volume * 100;
+    }
 }
 loadSavedSettings();
 
@@ -105,7 +111,7 @@ let play = () =>
         if(message.match(new RegExp(resetRegex)) && tags["mod"] === true)
         {
             addCustomMessageToChatHistory(`${tags["display-name"]} reset the TTS`);
-            synth.cancel();
+            play();
             return;
         }
 
@@ -135,16 +141,25 @@ let play = () =>
             return;
         }
 
+        const silentMessageRegex = /^\!s\s/;
+        if(message.match(new RegExp(silentMessageRegex)))
+        {
+            message = message.replace(silentMessageRegex, "");
+
+            addWithFlagToChatHistory("SILENT", "#FAE828", tags["display-name"], tags["color"], `${message}`);
+            return;
+        }
+
         const commandsRegex = /^\!/;
         if(message.match(new RegExp(commandsRegex)))
         {
-            addWithFlagToChatHistory("IGNORED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
+            addWithFlagToChatHistory("IGNORED", "#FF8400", tags["display-name"], tags["color"], `${message}`);
             return;
         }
 
         if(excluded.includes(tags["display-name"]))
         {
-            addWithFlagToChatHistory("MUTED", "#ff3333", tags["display-name"], tags["color"], `${message}`);
+            addWithFlagToChatHistory("MUTED", "#FF3333", tags["display-name"], tags["color"], `${message}`);
             return;
         }
 
@@ -158,6 +173,13 @@ let play = () =>
         }
 
         addToChatHistory(tags["display-name"], tags["color"], message);
+        addToQueue(message);
+    });
+
+    client.on("raided", (channel, username, viewers, tags) =>
+    {
+        let message = `${username} raided the stream with ${viewers} ${(viewers == 1 ? "viewer" : "viewers")}`;
+        addCustomMessageToChatHistory(message);
         addToQueue(message);
     });
 }
