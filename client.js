@@ -328,7 +328,7 @@ function createExcludedButton(name)
     button.setAttribute("id", "btn btn-light");
     button.setAttribute("data-bs-toggle", "tooltip");
     button.setAttribute("data-bs-placement", "right");
-    button.setAttribute("title", "Click to delete");
+    button.setAttribute("title", "Click to remove");
     new bootstrap.Tooltip(button);
     button.addEventListener("click", () =>
     {

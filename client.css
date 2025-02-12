@@ -106,7 +106,7 @@ button
     position: relative;
     width: 12.5vw;
     height: 46vh;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 1vw;
 }
 
