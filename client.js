@@ -22,6 +22,13 @@ let loadSavedSettings = () =>
         volume = localStorage.getItem("volume");
         document.getElementById("volume").value = volume * 100;
     }
+    if(localStorage.getItem("excluded") !== null)
+    {
+        JSON.parse(localStorage.getItem("excluded")).forEach((item, index) =>
+        {
+            createExcludedButton(item);
+        });
+    }
 }
 loadSavedSettings();
 
@@ -134,9 +141,14 @@ let play = () =>
             if(!excluded.includes(message))
                 return;
 
+            let tooltipInstance = bootstrap.Tooltip.getInstance(excludedButtons[excluded.indexOf(message)]);
+            if (tooltipInstance)
+                tooltipInstance.dispose();
+
             excludedButtons[excluded.indexOf(message)].remove();
             excludedButtons.splice(excluded.indexOf(message), 1);
             excluded.splice(excluded.indexOf(message), 1);
+            localStorage.setItem("excluded", JSON.stringify(excluded));
             addCustomMessageToChatHistory(`${tags["display-name"]} unmuted user "${message}"`);
             return;
         }
@@ -296,7 +308,7 @@ document.getElementById("exclude").addEventListener("click", () =>
     createExcludedButton(name);
 });
 
-let createExcludedButton = (name) =>
+function createExcludedButton(name)
 {
     if(name == "Anonimsko")
         return;
@@ -314,12 +326,21 @@ let createExcludedButton = (name) =>
     button.innerText = name;
     button.setAttribute("class", "btn btn-light");
     button.setAttribute("id", "btn btn-light");
+    button.setAttribute("data-bs-toggle", "tooltip");
+    button.setAttribute("data-bs-placement", "right");
+    button.setAttribute("title", "Click to delete");
+    new bootstrap.Tooltip(button);
     button.addEventListener("click", () =>
     {
+        let tooltipInstance = bootstrap.Tooltip.getInstance(button);
+        if (tooltipInstance)
+            tooltipInstance.dispose();
+
         excluded.splice(excluded.indexOf(name), 1);
         button.remove();
+        localStorage.setItem("excluded", JSON.stringify(excluded));
     });
     excludedButtons.push(button);
     excludedList.appendChild(button);
+    localStorage.setItem("excluded", JSON.stringify(excluded));
 }
-createExcludedButton("Moobot");
