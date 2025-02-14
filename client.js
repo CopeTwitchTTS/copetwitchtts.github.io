@@ -3,7 +3,7 @@ const synth = window.speechSynthesis;
 let voices;
 let voice = undefined;
 let multilingualVoice = undefined;
-let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an L" ];
+let sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an l" ];
 let channel = undefined;
 let volume = 0.5;
 let excluded = [];
