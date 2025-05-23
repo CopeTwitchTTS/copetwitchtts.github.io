@@ -122,6 +122,27 @@ let play = () =>
             return;
         }
 
+        const botMessageBlacklistRegex = /\s\.com+/;
+        if(message.match(new RegExp(botMessageBlacklistRegex)) && tags["mod"] === false)
+        {
+            addCustomMessageToChatHistory(`${tags["display-name"]} used a blacklisted phrase " .com"`);
+            return;
+        }
+
+        const botMessageBlacklistRegex2 = /\scom\s+/;
+        if(message.match(new RegExp(botMessageBlacklistRegex2)) && tags["mod"] === false)
+        {
+            addCustomMessageToChatHistory(`${tags["display-name"]} used a blacklisted phrase " com "`);
+            return;
+        }
+
+        const botMessageBlacklistRegex3 = /\scom$/;
+        if(message.match(new RegExp(botMessageBlacklistRegex3)) && tags["mod"] === false)
+        {
+            addCustomMessageToChatHistory(`${tags["display-name"]} used a blacklisted phrase " com"`);
+            return;
+        }
+
         const muteRegex = /^\!mute\s/;
         if(message.match(new RegExp(muteRegex)) && tags["mod"] === true)
         {
