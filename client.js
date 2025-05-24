@@ -143,6 +143,13 @@ let play = () =>
             return;
         }
 
+        const botMessageBlacklistRegex4 = /@[A-Za-z0-9]{8}$/;
+        if(message.match(new RegExp(botMessageBlacklistRegex4)) && tags["mod"] === false)
+        {
+            addCustomMessageToChatHistory(`${tags["display-name"]} used a blacklisted phrase "@********"`);
+            return;
+        }
+
         const muteRegex = /^\!mute\s/;
         if(message.match(new RegExp(muteRegex)) && tags["mod"] === true)
         {
