@@ -1,6 +1,5 @@
 let voices = [];
 const sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an l" ];
-let multilingualVoice = undefined;
 const blacklistedRegex = [/\s.com+/, /\scom\s+/, /\scom$/, /@[A-Za-z0-9]{8}$/];
 
 let client = undefined;

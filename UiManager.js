@@ -1,5 +1,6 @@
 const excludedUsersButtons = new Map();
 const synth = window.speechSynthesis;
+let multilingualVoice = undefined;
 
 const ShowTab = (tabId) =>
 {
