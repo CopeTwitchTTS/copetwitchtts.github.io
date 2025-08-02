@@ -186,19 +186,20 @@ synth.onvoiceschanged = () =>
     for(let i = voicesList.options.length - 1; i >= 0; i--)
         voicesList.remove(i);
 
+    let savedVoice = localStorage.getItem("voice");
     voices.forEach((item, index) =>
     {
         let option = document.createElement("option");
         option.text = `${item.name} (${item.lang})`;
         option.value = index;
 
-        if(item.name == localStorage.getItem("voice") && voice === undefined)
+        if(item.name == savedVoice)
         {
             option.selected = true;
             voice = index;
         }
 
-        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)" && multilingualVoice === undefined)
+        if(item.name == "Microsoft AvaMultilingual Online (Natural) - English (United States)")
             multilingualVoice = index;
 
         voicesList.add(option);

@@ -187,17 +187,17 @@ class CopeTwitch
 
         switch(message.command)
         {
-            case "001":
             case "002":
 			case "003":
 			case "004":
             case "353":
 			case "372":
 			case "375":
+            case "376":
 			case "CAP":
 				break;
 
-            case "376":
+            case "001":
                 this.Emit("connected",
                     this._socket.url,
                     this._loggedIn,

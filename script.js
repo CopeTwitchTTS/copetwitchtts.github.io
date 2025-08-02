@@ -41,9 +41,10 @@ const Play = () =>
 
     client.On("connected", (url, _loggedIn, channel) =>
     {
-        /*loggedIn = _loggedIn;
+        loggedIn = _loggedIn;
+        console.log(_loggedIn)
         if(!_loggedIn)
-            document.getElementById("followNotifications").disabled = true;*/
+            document.getElementById("followNotifications").disabled = true;
     });
 
     client.On("token_changed", (token) =>
