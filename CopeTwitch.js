@@ -10,6 +10,7 @@ class CopeTwitch
         this.clientId = null;
         this.broadcasterId = null;
         this.permissions = [];
+        this._loggedIn = false;
         this._lastFollowers = [];
         this._followCheckInterval = null;
         this._wsLink = "wss://irc-ws.chat.twitch.tv:443";
@@ -89,31 +90,42 @@ class CopeTwitch
 
     async Connect()
     {
-        const requiredCredentials =
-        {
-            username: "No username provided",
-            refreshToken: "No refresh token provided",
-            token: "No token provided",
-            channel: "No channel provided"
-        };
+        if (!this.channel)
+            throw new Error("No channel provided");
 
-        for (const [field, errorMessage] of Object.entries(requiredCredentials))
+        if(this.token)
         {
-            if (!this[field])
-                throw new Error(errorMessage);
+            const requiredCredentials =
+            {
+                username: "No username provided",
+                refreshToken: "No refresh token provided",
+                token: "No token provided"
+            };
+
+            for (const [field, errorMessage] of Object.entries(requiredCredentials))
+            {
+                if (!this[field])
+                    throw new Error(errorMessage);
+            }
+                
+            if (!await this._validateCredentials())
+                throw new Error("Failed to validate the account after multiple attempts");
+
+            this._loggedIn = true;
         }
-            
-        if (!await this._validateCredentials())
-            throw new Error("Failed to validate the account after multiple attempts");
+        else if(this.token === null)
+            this.username = `justinfan${Math.floor((Math.random() * 80000) + 1000)}`;
 
         this._socket = new WebSocket(this._wsLink);
 
         this._socket.onopen = () =>
         {
             this._send("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
-            this._send(`PASS oauth:${this.token}`);
+            if(this._loggedIn)
+                this._send(`PASS oauth:${this.token}`);
             this._send(`NICK ${this.username}`);
-            this._send(`JOIN #${channel}`);
+            this._send(`JOIN #${this.channel}`);
+
             if(this.debug)
                 console.log(`Connecting to: ${this._wsLink}`);
         }
@@ -122,7 +134,8 @@ class CopeTwitch
         this._socket.onclose = (event) => this.Emit("disconnected", event);
         this._socket.onerror = (error) => this.Emit("error", error);
 
-        this._trackFollowers();
+        if(this._loggedIn)
+            this._trackFollowers();
     }
 
     Disconnect()
@@ -187,6 +200,7 @@ class CopeTwitch
             case "376":
                 this.Emit("connected",
                     this._socket.url,
+                    this._loggedIn,
                     this.channel
                 );
                 break;
@@ -471,7 +485,7 @@ class CopeTwitch
 
     async Whisper(id, message)
     {
-        if(!this.permissions.includes("user:manage:whispers"))
+        if(!this.permissions.includes("user:manage:whispers") || !this._loggedIn)
             return;
 
         if(message.length > 500)
@@ -521,7 +535,7 @@ class CopeTwitch
 
     async Ban(id, duration = null, reason = null)
     {
-        if(!this.permissions.includes("moderator:manage:banned_users"))
+        if(!this.permissions.includes("moderator:manage:banned_users") || !this._loggedIn)
             return;
 
         const response = await fetch(
@@ -554,7 +568,7 @@ class CopeTwitch
 
     async Unban(id)
     {
-        if(!this.permissions.includes("moderator:manage:banned_users"))
+        if(!this.permissions.includes("moderator:manage:banned_users") || !this._loggedIn)
             return;
 
         const response = await fetch(
@@ -577,7 +591,7 @@ class CopeTwitch
 
     async DeleteMessage(id)
     {
-        if(!this.permissions.includes("moderator:manage:chat_messages"))
+        if(!this.permissions.includes("moderator:manage:chat_messages") || !this._loggedIn)
             return;
 
         const response = await fetch(

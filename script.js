@@ -1,8 +1,8 @@
 let voices = [];
 const sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an l" ];
 const blacklistedRegex = [/\s.com+/, /\scom\s+/, /\scom$/, /@[A-Za-z0-9]{8}$/];
-
 let client = undefined;
+let loggedIn = false;
 
 const AddToQueue = (message) =>
 {
@@ -14,7 +14,7 @@ const AddToQueue = (message) =>
 
 const Play = () =>
 {
-    if(username === undefined || token === undefined || channel === undefined)
+    if(channel === undefined)
         return;
 
     if(client !== undefined)
@@ -34,10 +34,17 @@ const Play = () =>
         channel: channel,
         options:
         {
-            debug: false
+            debug: true
         }
     });
     client.Connect();
+
+    client.On("connected", (url, _loggedIn, channel) =>
+    {
+        /*loggedIn = _loggedIn;
+        if(!_loggedIn)
+            document.getElementById("followNotifications").disabled = true;*/
+    });
 
     client.On("token_changed", (token) =>
     {
