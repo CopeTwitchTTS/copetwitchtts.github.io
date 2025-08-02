@@ -42,7 +42,8 @@ const Play = () =>
     client.On("connected", (url, _loggedIn, channel) =>
     {
         loggedIn = _loggedIn;
-        document.getElementById("followNotifications").checked = _loggedIn ? localStorage.getItem("followNotifications") === "true" : false;
+        followNotifications = _loggedIn ? localStorage.getItem("followNotifications") === "true" : false;
+        document.getElementById("followNotifications").checked = followNotifications;
         document.getElementById("followNotifications").disabled = !_loggedIn;
     });
 
