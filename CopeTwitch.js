@@ -127,7 +127,10 @@ class CopeTwitch
             this._send(`JOIN #${this.channel}`);
 
             if(this.debug)
+            {
                 console.log(`Connecting to: ${this._wsLink}`);
+                console.log(`You are currently ${this._loggedIn ? "" : "not "}logged in`)
+            }  
         }
 
         this._socket.onmessage = (event) => this._handleMessage(event.data);
@@ -218,8 +221,7 @@ class CopeTwitch
                 this.Emit("whisper",
                     message.channel,
                     message.tags,
-                    message.content,
-                    message
+                    message.content
                 );
                 break;
             
@@ -460,7 +462,7 @@ class CopeTwitch
 
     Say(channel, message)
     {
-        if(!this._socket)
+        if(!this._socket || !this._loggedIn)
             return;
 
         if(message.length > 500)

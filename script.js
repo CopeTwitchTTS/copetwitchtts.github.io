@@ -34,7 +34,7 @@ const Play = () =>
         channel: channel,
         options:
         {
-            debug: true
+            debug: false
         }
     });
     client.Connect();
@@ -42,9 +42,7 @@ const Play = () =>
     client.On("connected", (url, _loggedIn, channel) =>
     {
         loggedIn = _loggedIn;
-        console.log(_loggedIn)
-        if(!_loggedIn)
-            document.getElementById("followNotifications").disabled = true;
+        document.getElementById("followNotifications").disabled = !_loggedIn;
     });
 
     client.On("token_changed", (token) =>
@@ -71,7 +69,7 @@ const Play = () =>
 
         blacklistedRegex.forEach(regex =>
         {
-            if(message.match(new RegExp(regex)) && tags["mod"] == false)
+            if(message.match(new RegExp(regex)) && tags["mod"] == false && loggedIn)
             {
                 client.Ban(tags["user-id"], 30, "The use of a blacklisted phrase");
                 return;
@@ -79,7 +77,7 @@ const Play = () =>
         });
 
         const permissionListRegex = /^\!permissions/;
-        if(message.match(new RegExp(permissionListRegex)))
+        if(message.match(new RegExp(permissionListRegex)) && loggedIn)
         {
             if(tags["mod"] == false)
             {
