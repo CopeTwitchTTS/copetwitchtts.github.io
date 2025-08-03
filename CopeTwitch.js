@@ -120,7 +120,7 @@ class CopeTwitch
             this._loggedIn = true;
         }
         else if(this.token === null)
-            this.username = `justinfan${Math.floor((Math.random() * 80000) + 1000)}`;
+            this.username = `justinf2an${Math.floor((Math.random() * 80000) + 1000)}`;
 
         this._socket = new WebSocket(this._wsLink);
 
@@ -140,8 +140,16 @@ class CopeTwitch
         }
 
         this._socket.onmessage = (event) => this._handleMessage(event.data);
-        this._socket.onclose = (event) => this.Emit("disconnected", event);
-        this._socket.onerror = (error) => this.Emit("error", error);
+        this._socket.onclose = (event) =>
+        {
+            this._connected = false;
+            this.Emit("disconnected", event);
+        }
+        this._socket.onerror = (error) =>
+        {
+            this._connected = false; 
+            this.Emit("error", error);
+        }
 
         if(this._loggedIn)
             this._trackFollowers();

@@ -67,7 +67,7 @@ const Play = () =>
             return;
 
         console.log(`Error: ${error.code}`);
-
+        
         SetConnectionStatus("Error", "error");
         AddNotification(`Failed to connect`, 2000);
         disconnectCalled = false;
