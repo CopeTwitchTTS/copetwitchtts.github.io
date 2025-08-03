@@ -20,7 +20,6 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-
 }
 
 ::-webkit-scrollbar {
@@ -42,6 +41,61 @@ body {
     display: flex;
     flex-direction: column;
     padding: 0;
+}
+
+.connection-status {
+    position: absolute;
+    top: var(--base-spacing);
+    right: 2rem;
+    padding: 0.5rem 1.25rem;
+    background-color: var(--bg-darker);
+    color: var(--text-light);
+    border-radius: 2rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.connection-status:before {
+    content: "";
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    background-color: #ff6b6b;
+}
+
+.connection-status.connecting {
+    color: #feca57;
+    border-color: #feca57;
+}
+
+.connection-status.connecting:before {
+    background-color: #feca57;
+}
+
+.connection-status.connected {
+    color: #1dd1a1;
+    border-color: #1dd1a1;
+}
+
+.connection-status.connected:before {
+    background-color: #1dd1a1;
+}
+
+.connection-status.error {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+.connection-status.error:before {
+    background-color: #ff6b6b;
 }
 
 .nav-tabs {

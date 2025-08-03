@@ -10,6 +10,7 @@ class CopeTwitch
         this.clientId = null;
         this.broadcasterId = null;
         this.permissions = [];
+        this._connected = false;
         this._loggedIn = false;
         this._lastFollowers = [];
         this._followCheckInterval = null;
@@ -88,6 +89,11 @@ class CopeTwitch
         return false;
     }
 
+    IsConnected()
+    {
+        return this._connected;
+    }
+
     async Connect()
     {
         if (!this.channel)
@@ -152,8 +158,13 @@ class CopeTwitch
             this._followCheckInterval = null;
         }
 
-        this._socket.close();
-        this._socket = null;
+        if(this._connected)
+        {
+            this._socket.close();
+            this._socket = null;
+        }
+        
+        this._connected = false;
     }
 
     On(event, listener)
@@ -201,6 +212,7 @@ class CopeTwitch
 				break;
 
             case "001":
+                this._connected = true;
                 this.Emit("connected",
                     this._socket.url,
                     this._loggedIn,
@@ -312,12 +324,17 @@ class CopeTwitch
                         console.log(`Unhandled NOTICE message from the server: \n${JSON.stringify(message, null, 4)}`);
                         break;
                 }
-
                 break;
             
             case "RECONNECT":
                 console.log("Received RECONNECT request from Twitch");
+                this.Emit("reconnect",
+                    this._socket.url,
+                    this._loggedIn,
+                    this.channel
+                );
                 this.Disconnect();
+                this._connected = false;
                 setTimeout(() =>
                 {
                     this.Connect();

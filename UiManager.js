@@ -2,6 +2,45 @@ const excludedUsersButtons = new Map();
 const synth = window.speechSynthesis;
 let multilingualVoice = undefined;
 
+const AddNotification = (message, duration) =>
+{
+    const mainDiv = document.createElement("div");
+    mainDiv.className = "toast align-items-center position-fixed top-0 start-50 translate-middle-x";
+    mainDiv.style.background = "var(--primary)";
+    mainDiv.style.margin = "var(--base-spacing)";
+    mainDiv.setAttribute("role", "alert");
+    mainDiv.setAttribute("aria-live", "assertive");
+    mainDiv.setAttribute("aria-atomic", "true");
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "toast-body";
+    messageDiv.innerText = message;
+
+    mainDiv.appendChild(messageDiv);
+    document.body.appendChild(mainDiv);
+
+    const toast = new bootstrap.Toast(mainDiv,
+    {
+        autohide: true,
+        delay: duration ?? 1000
+    });
+    
+    toast.show();
+    mainDiv.addEventListener("hidden.bs.toast", () =>
+    {
+        mainDiv.remove();
+    });
+}
+
+const SetConnectionStatus = (text, status) =>
+{
+    const statusElement = document.getElementById("connectionStatus");
+    statusElement.innerText = text;
+    statusElement.className = "connection-status";
+    if(status === "connected" || status === "connecting" || status === "error")
+        statusElement.classList.add(status);
+}
+
 const ShowTab = (tabId) =>
 {
     const tabContents = document.querySelectorAll(".tab-content");
@@ -216,9 +255,9 @@ synth.onvoiceschanged = () =>
 const GetCurrentTime = () =>
 {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
 }
 

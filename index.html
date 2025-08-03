@@ -15,7 +15,9 @@
 </head>
 <body>
 
-    <div class="container-fluid py-3">
+    <div class="container-fluid py-3" id="mainContainer">
+        <div class="connection-status" id="connectionStatus">Not Connected</div>
+
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat" type="button" role="tab">Chat</button>
@@ -59,7 +61,7 @@
                             <div class="mb-3 w-100 d-flex justify-content-between align-items-center">
                                 <label class="form-label m-0 pe-2" for="followNotifications">Follow Notifications</label>
                                 <label class="toggle-switch">
-                                    <input type="checkbox" id="followNotifications">
+                                    <input type="checkbox" id="followNotifications" disabled>
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>

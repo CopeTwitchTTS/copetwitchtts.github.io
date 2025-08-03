@@ -45,12 +45,6 @@ document.addEventListener("DOMContentLoaded", () =>
         document.getElementById("volumeSlider").value = volume * 100;
     }
 
-    if(localStorage.getItem("followNotifications") !== null)
-    {
-        followNotifications = localStorage.getItem("followNotifications") === "true";
-        document.getElementById("followNotifications").checked = followNotifications;
-    }
-
     if(localStorage.getItem("excluded") !== null)
     {
         JSON.parse(localStorage.getItem("excluded")).forEach((item, index) =>

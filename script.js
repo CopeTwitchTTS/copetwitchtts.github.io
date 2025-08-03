@@ -3,6 +3,7 @@ const sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "ky
 const blacklistedRegex = [/\s.com+/, /\scom\s+/, /\scom$/, /@[A-Za-z0-9]{8}$/];
 let client = undefined;
 let loggedIn = false;
+let disconnectCalled = false;
 
 const AddToQueue = (message) =>
 {
@@ -14,14 +15,16 @@ const AddToQueue = (message) =>
 
 const Play = () =>
 {
-    if(channel === undefined)
-        return;
-
     if(client !== undefined)
     {
         synth.cancel();
         client.Disconnect();
     } 
+
+    if(channel === undefined || channel === null || channel.trim() === "")
+        return;
+    
+    SetConnectionStatus("Connecting", "connecting");
 
     client = new CopeTwitch(
     {
@@ -39,13 +42,36 @@ const Play = () =>
     });
     client.Connect();
 
+    client.On("reconnect", (url, _loggedIn, channel) =>
+    {
+        SetConnectionStatus("Connecting", "connecting");
+        AddNotification("Received reconnect request from Twitch", 2000);
+    });
+
     client.On("connected", (url, _loggedIn, channel) =>
     {
+        SetConnectionStatus(`Connected (${_loggedIn ? "Logged In" : "Anonymous"})`, "connected");
+        AddNotification(`Connected to channel ${channel}`, 2000);
         loggedIn = _loggedIn;
-        followNotifications = _loggedIn ? localStorage.getItem("followNotifications") === "true" : false;
-        document.getElementById("followNotifications").checked = followNotifications;
+        if(localStorage.getItem("followNotifications") !== null)
+        {
+            followNotifications = _loggedIn ? localStorage.getItem("followNotifications") === "true" : false;
+            document.getElementById("followNotifications").checked = followNotifications;
+        }
         document.getElementById("followNotifications").disabled = !_loggedIn;
     });
+
+    client.On("disconnected", (error) =>
+    {
+        if(disconnectCalled)
+            return;
+
+        console.log(`Error: ${error.code}`);
+
+        SetConnectionStatus("Error", "error");
+        AddNotification(`Failed to connect`, 2000);
+        disconnectCalled = false;
+    })
 
     client.On("token_changed", (token) =>
     {
@@ -167,7 +193,17 @@ const Play = () =>
 document.addEventListener("DOMContentLoaded", Play);
 
 
-document.getElementById("play").addEventListener("click", Play);
+document.getElementById("play").addEventListener("click", () =>
+{
+    if(channel === undefined || channel === null || channel.trim() === "")
+    {
+        AddNotification("Please provide a channel name", 2000);
+        SetConnectionStatus("Not Connected");
+        return;
+    }
+
+    Play();
+});
 
 
 document.getElementById("skip").addEventListener("click", () =>
@@ -177,6 +213,10 @@ document.getElementById("skip").addEventListener("click", () =>
 
 document.getElementById("stop").addEventListener("click", () =>
 {
+    SetConnectionStatus("Not Connected", "");
+
+    disconnectCalled = true;
+
     if(client !== undefined)
         client.Disconnect();
     synth.cancel();
