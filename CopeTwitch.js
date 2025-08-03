@@ -120,7 +120,7 @@ class CopeTwitch
             this._loggedIn = true;
         }
         else if(this.token === null)
-            this.username = `justinf2an${Math.floor((Math.random() * 80000) + 1000)}`;
+            this.username = `justinfan${Math.floor((Math.random() * 80000) + 1000)}`;
 
         this._socket = new WebSocket(this._wsLink);
 
