@@ -5,7 +5,7 @@ let multilingualVoice = undefined;
 const AddNotification = (message, duration) =>
 {
     const mainDiv = document.createElement("div");
-    mainDiv.className = "toast align-items-center position-fixed top-0 start-50 translate-middle-x";
+    mainDiv.className = "toast fs-6 align-items-center position-fixed top-0 start-50 translate-middle-x";
     mainDiv.style.background = "var(--primary)";
     mainDiv.style.margin = "var(--base-spacing)";
     mainDiv.setAttribute("role", "alert");
@@ -179,6 +179,13 @@ document.addEventListener("DOMContentLoaded", () =>
     {
         followNotifications = e.currentTarget.checked;
         localStorage.setItem("followNotifications", followNotifications);
+    });
+
+
+    /* Developer Mode */
+    document.getElementById("developerMode").addEventListener("change", (e) =>
+    {
+        logger.SetFlushState(e.currentTarget.checked);
     });
 
     

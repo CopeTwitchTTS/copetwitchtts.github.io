@@ -2,6 +2,7 @@ let voices = [];
 const sentencesForMultilingual = [ "jesus christo", "jesus", "jesus christ", "kys", "thats an l" ];
 const blacklistedRegex = [/\s.com+/, /\scom\s+/, /\scom$/, /@[A-Za-z0-9]{8}$/];
 let client = undefined;
+let logger = new Logger();
 let loggedIn = false;
 let disconnectCalled = false;
 
@@ -35,10 +36,7 @@ const Play = () =>
             token: token
         },
         channel: channel,
-        options:
-        {
-            debug: false
-        }
+        logger: logger
     });
     client.Connect();
 
@@ -61,17 +59,25 @@ const Play = () =>
         document.getElementById("followNotifications").disabled = !_loggedIn;
     });
 
-    client.On("disconnected", (error) =>
+    client.On("disconnected", (event) =>
     {
         if(disconnectCalled)
             return;
 
-        console.log(`Error: ${error.code}`);
+        logger.Push(`Disconnected. Error: \n${logger.JSON(event)}`);
         
         SetConnectionStatus("Error", "error");
-        AddNotification(`Failed to connect`, 2000);
+        AddNotification(`Failed to connect. Error: ${event.code}`, 2000);
         disconnectCalled = false;
-    })
+    });
+
+    client.On("error", (error) =>
+    {
+        logger.Push(`Connection Error: \n${logger.JSON(error)}`);
+
+        SetConnectionStatus("Error", "error");
+        AddNotification(`Failed to connect`, 2000);
+    });
 
     client.On("token_changed", (token) =>
     {

@@ -6,7 +6,6 @@ class CopeTwitch
         this.token = params.identity.token ?? null;
         this.refreshToken = params.identity.refreshToken ?? null;
         this.channel = params.channel ?? null;
-        this.debug = params.options.debug ?? false;
         this.clientId = null;
         this.broadcasterId = null;
         this.permissions = [];
@@ -17,6 +16,19 @@ class CopeTwitch
         this._wsLink = "wss://irc-ws.chat.twitch.tv:443";
         this._socket = null;
         this._events = {};
+        this.logger = params.logger ?? 
+        {
+            Push: (message) => console.log(message),
+            SetFlushState: () => {},
+            JSON: (obj) =>
+            {
+                const data = {};
+                for (const key in obj)
+                    data[key] = obj[key];
+                
+                return JSON.stringify(data, null, 4);
+            }
+        };
     }
 
     async _getAccountInfo()
@@ -37,11 +49,12 @@ class CopeTwitch
             this.broadcasterId = data.user_id;
             this.permissions = data.scopes;
 
+            this.logger.Push("Account validation successful");
             return true;
         }
         catch(error)
         {
-            console.error("Account validation failed:", error);
+            this.logger.Push(`Account validation failed: ${this.logger.JSON(error)}`);
             return false;
         }
     }
@@ -63,17 +76,15 @@ class CopeTwitch
             if(!data.success)
                 return false;
 
-            if(this.debug)
-                console.log("Token has been refreshed");
-
             this.token = data.token;
             this.Emit("token_changed", this.token);
 
+            this.logger.Push("Token has been refreshed");
             return true;
         }
         catch(error)
         {
-            console.error("Token refresh failed:", error);
+            this.logger.Push(`Token refresh failed: ${this.logger.JSON(error)}`);
             return false;
         }
     }
@@ -97,8 +108,11 @@ class CopeTwitch
     async Connect()
     {
         if (!this.channel)
-            throw new Error("No channel provided");
-
+        {
+            this.logger.Push("No channel provided");
+            return;
+        }
+            
         if(this.token)
         {
             const requiredCredentials =
@@ -111,11 +125,17 @@ class CopeTwitch
             for (const [field, errorMessage] of Object.entries(requiredCredentials))
             {
                 if (!this[field])
-                    throw new Error(errorMessage);
+                {
+                    this.logger.Push(errorMessage);
+                    return;
+                }
             }
                 
             if (!await this._validateCredentials())
-                throw new Error("Failed to validate the account after multiple attempts");
+            {
+                this.logger.Push("Failed to validate the account after multiple attempts");
+                return;
+            }
 
             this._loggedIn = true;
         }
@@ -123,7 +143,6 @@ class CopeTwitch
             this.username = `justinfan${Math.floor((Math.random() * 80000) + 1000)}`;
 
         this._socket = new WebSocket(this._wsLink);
-
         this._socket.onopen = () =>
         {
             this._send("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
@@ -132,11 +151,8 @@ class CopeTwitch
             this._send(`NICK ${this.username}`);
             this._send(`JOIN #${this.channel}`);
 
-            if(this.debug)
-            {
-                console.log(`Connecting to: ${this._wsLink}`);
-                console.log(`You are currently ${this._loggedIn ? "" : "not "}logged in`)
-            }  
+            this.logger.Push(`Connecting to: ${this._wsLink}`);
+            this.logger.Push(`You are currently ${this._loggedIn ? "" : "not "}logged in`)
         }
 
         this._socket.onmessage = (event) => this._handleMessage(event.data);
@@ -172,6 +188,8 @@ class CopeTwitch
             this._socket = null;
         }
         
+        this.logger.Push("Disconnected by user");
+
         this._connected = false;
     }
 
@@ -301,7 +319,7 @@ class CopeTwitch
                     );
                 }
                 else
-                    console.log(`Unhandled ROOMSTATE message from the server: \n${JSON.stringify(message, null, 4)}`);
+                    this.logger.Push(`Unhandled ROOMSTATE message from the server: \n${this.logger.JSON(message)}`);
 
                 break;
 
@@ -329,13 +347,13 @@ class CopeTwitch
                         break;
 
                     default:
-                        console.log(`Unhandled NOTICE message from the server: \n${JSON.stringify(message, null, 4)}`);
+                        this.logger.Push(`Unhandled NOTICE message from the server: \n${this.logger.JSON(message)}`);
                         break;
                 }
                 break;
             
             case "RECONNECT":
-                console.log("Received RECONNECT request from Twitch");
+                this.logger.Push("Received RECONNECT request from Twitch");
                 this.Emit("reconnect",
                     this._socket.url,
                     this._loggedIn,
@@ -350,7 +368,7 @@ class CopeTwitch
                 break;
 
             default:
-                console.log(`Unhandled message from the server: \n${JSON.stringify(message, null, 4)}`);
+                this.logger.Push(`Unhandled message from the server: \n${this.logger.JSON(message)}`);
                 break;
         }
     }
