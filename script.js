@@ -14,10 +14,17 @@ const AddToQueue = (message) =>
     synth.speak(utterance);
 }
 
+const IsModOrBroadcaster = (username, tags) =>
+{
+    return username === channel || tags["mod"] == true;
+}
+
 const Play = () =>
 {
     if(client !== undefined)
     {
+        disconnectCalled = true;
+
         synth.cancel();
         client.Disconnect();
     } 
@@ -42,6 +49,8 @@ const Play = () =>
 
     client.On("reconnect", (url, _loggedIn, channel) =>
     {
+        logger.Push("Received reconnect request from Twitch");
+
         SetConnectionStatus("Connecting", "connecting");
         AddNotification("Received reconnect request from Twitch", 2000);
     });
@@ -91,10 +100,10 @@ const Play = () =>
             client.Say("anonimsko", `Hey @${username}, thanks for the follow!`);
     });
 
-    client.On("message", (channel, tags, message, self) =>
+    client.On("message", (channel, username, tags, message, self) =>
     {
         const resetRegex = /^\!resetTTS/;
-        if(message.match(new RegExp(resetRegex)) && tags["mod"] == true)
+        if(message.match(new RegExp(resetRegex)) && IsModOrBroadcaster(username, tags))
         {
             AddMessage("#FF1133", "SYSTEM", `${tags["display-name"]} reset the TTS`, "#FF1133")
             Play();
@@ -103,7 +112,7 @@ const Play = () =>
 
         blacklistedRegex.forEach(regex =>
         {
-            if(message.match(new RegExp(regex)) && tags["mod"] == false && loggedIn)
+            if(message.match(new RegExp(regex)) && !IsModOrBroadcaster(username, tags) && loggedIn)
             {
                 client.Ban(tags["user-id"], 30, "The use of a blacklisted phrase");
                 return;
@@ -113,7 +122,7 @@ const Play = () =>
         const permissionListRegex = /^\!permissions/;
         if(message.match(new RegExp(permissionListRegex)) && loggedIn)
         {
-            if(tags["mod"] == false)
+            if(!IsModOrBroadcaster(username, tags))
             {
                 AddMessageWithFlag("#FF8800", "IGNORED", tags["color"], tags["display-name"], message);
                 return;
@@ -128,7 +137,7 @@ const Play = () =>
         if(message.match(new RegExp(muteRegex)))
         {
             message = message.replace(muteRegex, "");
-            if(excluded.includes(message) === true || tags["mod"] == false)
+            if(excluded.includes(message) === true || !IsModOrBroadcaster(username, tags))
             {
                 AddMessageWithFlag("#FF8800", "IGNORED", tags["color"], tags["display-name"], `!mute ${message}`);
                 return;
@@ -143,7 +152,7 @@ const Play = () =>
         if(message.match(new RegExp(unmuteRegex)))
         {
             message = message.replace(unmuteRegex, "");
-            if(excluded.includes(message) === false || tags["mod"] == false)
+            if(excluded.includes(message) === false || !IsModOrBroadcaster(username, tags))
             {
                 AddMessageWithFlag("#FF8800", "IGNORED", tags["color"], tags["display-name"], `!unmute ${message}`);
                 return;

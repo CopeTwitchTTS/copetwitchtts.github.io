@@ -249,6 +249,7 @@ class CopeTwitch
             case "PRIVMSG":
                 this.Emit("message",
                     message.channel,
+                    message.username,
                     message.tags,
                     message.content,
                     message.self
@@ -407,8 +408,8 @@ class CopeTwitch
         
         return{
             tags,
-            username: prefix.split("!")[0]?.replace(/^:/, "") || "",
-            command,
+            username: prefix.split("!")[0]?.replace(/^:/, "").replace(/\n|\r/g, "") || "",
+            command: command.replace(/\n|\r/g, ""),
             channel: channel.split(":")[0]?.replace(/^#|^:/, "").replace(/\n|\r/g, "") || "",
             content: this._clearMessage(content),
             self: prefix.startsWith(`:${this.username}`),
